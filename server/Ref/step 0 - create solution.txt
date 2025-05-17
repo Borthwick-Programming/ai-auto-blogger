@@ -1,0 +1,21 @@
+# 1. Create solution and projects using cli:
+# Local folder: <USER_DOCUMENTS>\Projects\ai-auto-blogger\repo\dev\ai-auto-blogger\server
+
+dotnet new sln -n WorkflowEngine
+
+# Core backend projects
+dotnet new webapi -n WorkflowEngine.Api
+dotnet new classlib -n WorkflowEngine.Domain
+dotnet new classlib -n WorkflowEngine.Runtime
+dotnet new classlib -n WorkflowEngine.Infrastructure
+
+# Add to solution
+dotnet sln add WorkflowEngine.Api/WorkflowEngine.Api.csproj
+dotnet sln add WorkflowEngine.Domain/WorkflowEngine.Domain.csproj
+dotnet sln add WorkflowEngine.Runtime/WorkflowEngine.Runtime.csproj
+dotnet sln add WorkflowEngine.Runtime/WorkflowEngine.Infrastructure.csproj
+
+# Reference domain/runtime in API
+dotnet add WorkflowEngine.Api reference WorkflowEngine.Domain
+dotnet add WorkflowEngine.Api reference WorkflowEngine.Runtime
+dotnet add WorkflowEngine.Api reference WorkflowEngine.Infrastructure
