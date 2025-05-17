@@ -1,21 +1,25 @@
-# 1. Create solution and projects using cli:
-# Local folder: <USER_DOCUMENTS>\Projects\ai-auto-blogger\repo\dev\ai-auto-blogger\server
-
+# 📁 Create solution in working folder:
 dotnet new sln -n WorkflowEngine
 
-# Core backend projects
-dotnet new webapi -n WorkflowEngine.Api
+# 🧱 Create core backend projects
+# The Web API template includes launchSettings.json automatically
+dotnet new webapi -n WorkflowEngine.Api --no-https   # optional flag to skip HTTPS setup
 dotnet new classlib -n WorkflowEngine.Domain
 dotnet new classlib -n WorkflowEngine.Runtime
 dotnet new classlib -n WorkflowEngine.Infrastructure
 
-# Add to solution
-dotnet sln add WorkflowEngine.Api/WorkflowEngine.Api.csproj
-dotnet sln add WorkflowEngine.Domain/WorkflowEngine.Domain.csproj
-dotnet sln add WorkflowEngine.Runtime/WorkflowEngine.Runtime.csproj
-dotnet sln add WorkflowEngine.Runtime/WorkflowEngine.Infrastructure.csproj
+# ➕ Add projects to solution
+dotnet sln WorkflowEngine.sln add WorkflowEngine.Api/WorkflowEngine.Api.csproj
+dotnet sln WorkflowEngine.sln add WorkflowEngine.Domain/WorkflowEngine.Domain.csproj
+dotnet sln WorkflowEngine.sln add WorkflowEngine.Runtime/WorkflowEngine.Runtime.csproj
+dotnet sln WorkflowEngine.sln add WorkflowEngine.Infrastructure/WorkflowEngine.Infrastructure.csproj
 
-# Reference domain/runtime in API
+# 🔗 Add project references
 dotnet add WorkflowEngine.Api reference WorkflowEngine.Domain
 dotnet add WorkflowEngine.Api reference WorkflowEngine.Runtime
 dotnet add WorkflowEngine.Api reference WorkflowEngine.Infrastructure
+
+dotnet add WorkflowEngine.Runtime reference WorkflowEngine.Domain
+dotnet add WorkflowEngine.Infrastructure reference WorkflowEngine.Domain
+
+#remember to select http for local debugging initially
