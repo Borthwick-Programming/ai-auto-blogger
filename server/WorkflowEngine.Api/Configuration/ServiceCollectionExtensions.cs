@@ -20,13 +20,22 @@ namespace WorkflowEngine.Api.Configuration
             foreach (var file in files)
             {
                 var json = File.ReadAllText(file);
-                var extNode = JsonSerializer.Deserialize<ExtendedNodeDefinition>(json);
+
+                var extNode = JsonSerializer.Deserialize<ExtendedNodeDefinition>
+                    (
+                      json,
+                      new JsonSerializerOptions 
+                      { 
+                          PropertyNameCaseInsensitive = true 
+                      }
+                    );
 
                 if (extNode != null)
                 {
                     registry.Register(extNode.ToNodeDefinition());
                 }
             }
+            services.AddSingleton<INodeRegistry>(registry);
 
             return services;
         }
