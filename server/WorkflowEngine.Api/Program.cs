@@ -1,3 +1,4 @@
+using WorkflowEngine.Api.Configuration;
 using WorkflowEngine.Domain.Models;
 using WorkflowEngine.Runtime.Interfaces;
 using WorkflowEngine.Runtime.Services;
@@ -14,33 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Create an in-memory node registry to hold all available node types.
-// This is where we define the behavior and configuration schema of nodes
-var nodeRegistry = new InMemoryNodeRegistry();
-
-// Register a core node type: HTTP Request
-// This node allows external API calls with configurable method and URL
-nodeRegistry.Register(new NodeDefinition(
-    Id: "http-request",
-    Name: "HTTP Request",
-    Description: "Calls an external API.",
-    NodeType: "http-request",
-    ConfigurationSchemaJson: """
-    {
-        "type": "object",
-        "properties": {
-            "url": { "type": "string" },
-            "method": { "type": "string", "enum": ["GET", "POST", "PUT", "DELETE"] }
-        },
-        "required": ["url", "method"]
-    }
-    """,
-    Inputs: new(),
-    Outputs: new() { new PortDefinition("response", "object") }
-));
-
-// Register the node registry as a singleton service so it can be injected via DI
-builder.Services.AddSingleton<INodeRegistry>(nodeRegistry);
-
+// Define the behavior and configuration schema of nodes
+builder.Services.AddNodeRegistry(); //node setups
 
 var app = builder.Build();
 
