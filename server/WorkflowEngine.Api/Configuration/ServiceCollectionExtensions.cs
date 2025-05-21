@@ -3,6 +3,8 @@ using System.Text.Json;
 using WorkflowEngine.Domain.Models;
 using WorkflowEngine.Runtime.Interfaces;
 using WorkflowEngine.Runtime.Services;
+using Microsoft.EntityFrameworkCore;
+using WorkflowEngine.Infrastructure.Data;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace WorkflowEngine.Api.Configuration
@@ -37,6 +39,15 @@ namespace WorkflowEngine.Api.Configuration
 
             // Register the populated instance
             services.AddSingleton<INodeRegistry>(registry);
+            return services;
+        }
+        public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<WorkflowEngineDbContext>(options =>
+                options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+
+            // TODO: register repository interfaces 
+
             return services;
         }
     }

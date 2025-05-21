@@ -36,6 +36,8 @@ builder.Services.AddSwaggerGen();
 //builder.Services.AddNodeDefinitions(builder.Configuration, builder.Environment);//works by itself
 builder.Services.AddNodeDefinitions(builder.Configuration, builder.Environment);
 
+builder.Services.AddPersistence(builder.Configuration); //persistence setup
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
