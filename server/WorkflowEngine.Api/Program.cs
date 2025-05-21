@@ -5,7 +5,12 @@ using WorkflowEngine.Domain.Models;
 using WorkflowEngine.Runtime.Interfaces;
 using WorkflowEngine.Runtime.Services;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
+
+var dataPath = Path.Combine(builder.Environment.ContentRootPath, "Data");
+Directory.CreateDirectory(dataPath);
 
 //cors
 var allowedOrigins = builder.Configuration
