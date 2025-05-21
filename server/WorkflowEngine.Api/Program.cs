@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using System;
 using System.Reflection;
 using WorkflowEngine.Api.Configuration;
@@ -28,7 +30,15 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 
 // Add support for MVC-style controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    // Apply [Authorize] to all controllers by default
+    // This will require authentication for all endpoints unless overridden; [AllowAnonymous] decorated endpoints stay open
+    var policy = new AuthorizationPolicyBuilder()
+                     .RequireAuthenticatedUser()
+                     .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 // Add support for Swagger/OpenAPI documentation
 builder.Services.AddEndpointsApiExplorer();
