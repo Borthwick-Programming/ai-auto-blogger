@@ -53,6 +53,8 @@ builder.Services.AddNodeDefinitions(builder.Configuration, builder.Environment);
 
 builder.Services.AddPersistence(builder.Configuration); //persistence setup
 
+builder.Services.AddAuthenticationServices(builder.Configuration);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

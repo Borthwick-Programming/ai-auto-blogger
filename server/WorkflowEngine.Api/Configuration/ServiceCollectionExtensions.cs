@@ -6,6 +6,7 @@ using WorkflowEngine.Runtime.Services;
 using Microsoft.EntityFrameworkCore;
 using WorkflowEngine.Infrastructure.Data;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Authentication.Negotiate;
 
 namespace WorkflowEngine.Api.Configuration
 {
@@ -47,6 +48,22 @@ namespace WorkflowEngine.Api.Configuration
                 options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
             // TODO: register repository interfaces 
+
+            return services;
+        }
+
+        /// <summary>
+        /// Configures Windows Authentication (Negotiate) as the default auth scheme.
+        /// </summary>
+        public static IServiceCollection AddAuthenticationServices(
+            this IServiceCollection services, IConfiguration config)
+        {
+            // 1) Set Negotiate as the default scheme for both Authenticate & Challenge
+            services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+                    .AddNegotiate();
+
+            // 2) Add policy support
+            services.AddAuthorization();
 
             return services;
         }
