@@ -34,3 +34,40 @@ The `WorkflowEngine.Api` project is the **entry point for the workflow engine's 
 - WorkflowEngine.Domain
 - WorkflowEngine.Runtime
 - WorkflowEngine.Infrastructure
+
+### For SQL Lite install
+- we have a Data folder. We need to make sure that the following NuGet packages are referenced:
+-- dotnet add WorkflowEngine.Api package Microsoft.EntityFrameworkCore.Design
+-- dotnet add WorkflowEngine.Api package Microsoft.EntityFrameworkCore.Tools
+
+### Using the .NET CLI
+-From solution root (where WorkflowEngine.sln lives), run:
+
+--Scaffold the initial migration
+`bash
+Copy
+Edit
+dotnet ef migrations add InitialCreate \
+  --project WorkflowEngine.Infrastructure \
+  --startup-project WorkflowEngine.Api
+Apply the migration and create the database
+
+bash
+Copy
+Edit
+dotnet ef database update \
+  --project WorkflowEngine.Infrastructure \
+  --startup-project WorkflowEngine.Api`
+
+  ### Using Visual Studio Package Manager Console
+- Set Default project to WorkflowEngine.Infrastructure in the PMC toolbar.
+- (One-time only) Add the EF Tools to the API project:
+	`dotnet add WorkflowEngine.Api package Microsoft.EntityFrameworkCore.Tools`
+- Scaffold the migration:
+	`Add-Migration InitialCreate 
+  -Project WorkflowEngine.Infrastructure 
+  -StartupProject WorkflowEngine.Api`
+  -Apply the migration:
+  `Update-Database 
+  -Project WorkflowEngine.Infrastructure 
+  -StartupProject WorkflowEngine.Api`

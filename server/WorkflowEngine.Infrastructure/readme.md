@@ -31,3 +31,16 @@ The `WorkflowEngine.Infrastructure` project contains **external implementations*
 
 - WorkflowEngine.Domain
 - Optional: external libraries like Quartz, HttpClientFactory, or Entity Framework
+
+## Database Setup
+
+We use EF Core with SQLite for our local persistence. Follow the steps below to scaffold the initial migration and create the `workflow.db` file.
+Ensure the following NuGet packages are referenced:
+dotnet add WorkflowEngine.Infrastructure package Microsoft.EntityFrameworkCore.Sqlite
+
+### Prerequisites
+
+- Install the EF Core CLI tool globally (if you haven’t already):
+  ```bash
+  dotnet tool install --global dotnet-ef --version 9.*
+
