@@ -1,9 +1,24 @@
+using System;
+using System.Reflection;
 using WorkflowEngine.Api.Configuration;
 using WorkflowEngine.Domain.Models;
 using WorkflowEngine.Runtime.Interfaces;
 using WorkflowEngine.Runtime.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//cors
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowViteClient", policy =>
+        policy.WithOrigins(allowedOrigins ?? Array.Empty<string>())
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
 
 // Add services to the container.
 
@@ -16,7 +31,10 @@ builder.Services.AddSwaggerGen();
 
 // Create an in-memory node registry to hold all available node types.
 // Define the behavior and configuration schema of nodes
-builder.Services.AddNodeRegistry(); //node setups
+//builder.Services.AddNodeRegistry(); //node setups
+
+//builder.Services.AddNodeDefinitions(builder.Configuration, builder.Environment);//works by itself
+builder.Services.AddNodeDefinitions(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 

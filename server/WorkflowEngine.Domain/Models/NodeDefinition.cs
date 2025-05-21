@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace WorkflowEngine.Domain.Models
@@ -22,7 +23,7 @@ namespace WorkflowEngine.Domain.Models
     string Name,
     string Description,
     string NodeType,
-    string ConfigurationSchemaJson,
+    JsonElement ConfigurationSchemaJson,
     List<PortDefinition> Inputs,
     List<PortDefinition> Outputs
 );

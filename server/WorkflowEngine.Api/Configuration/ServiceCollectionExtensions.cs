@@ -3,41 +3,42 @@ using System.Text.Json;
 using WorkflowEngine.Domain.Models;
 using WorkflowEngine.Runtime.Interfaces;
 using WorkflowEngine.Runtime.Services;
+using static System.Net.Mime.MediaTypeNames;
+
 namespace WorkflowEngine.Api.Configuration
 {
     public static class ServiceCollectionExtensions
     {
+
         /// <summary>
-        /// Registers the in-memory node registry and all core node definitions.
+        /// Registers an in-memory <see cref="INodeRegistry"/> implementation and
+        /// loads all node definitions from JSON files in the “Configuration/NodeDefinitions” folder.
         /// </summary>
-        public static IServiceCollection AddNodeRegistry(this IServiceCollection services)
+        /// <param name="services">The DI service collection.</param>
+        /// <param name="config">
+        /// The application configuration (can be used to customize the definitions folder path).
+        /// </param>
+        /// <returns>The updated service collection.</returns>
+        public static IServiceCollection AddNodeDefinitions(
+            this IServiceCollection services, IConfiguration config, IHostEnvironment env)
         {
+            // Load definitions first
+            var folder = Path.Combine(env.ContentRootPath, "Configuration", "NodeDefinitions");
             var registry = new InMemoryNodeRegistry();
-            string basePath = AppContext.BaseDirectory;
-            string schemaPath = Path.Combine(basePath, "Configuration", "NodeSchemas");
-            string nodePath = Path.Combine(AppContext.BaseDirectory, "Configuration", "NodeDefinitions");
-            string[] files = Directory.GetFiles(nodePath, "*.json");
-            foreach (var file in files)
+
+            foreach (var file in Directory.EnumerateFiles(folder, "*.json"))
             {
                 var json = File.ReadAllText(file);
-
-                var extNode = JsonSerializer.Deserialize<ExtendedNodeDefinition>
-                    (
-                      json,
-                      new JsonSerializerOptions 
-                      { 
-                          PropertyNameCaseInsensitive = true 
-                      }
-                    );
-
-                if (extNode != null)
-                {
-                    registry.Register(extNode.ToNodeDefinition());
-                }
+                var def = JsonSerializer.Deserialize<ExtendedNodeDefinition>(json,
+                             new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                          ?? throw new InvalidOperationException($"Could not parse {file}");
+                registry.Register(def.ToNodeDefinition());
             }
-            services.AddSingleton<INodeRegistry>(registry);
 
+            // Register the populated instance
+            services.AddSingleton<INodeRegistry>(registry);
             return services;
         }
     }
+
 }

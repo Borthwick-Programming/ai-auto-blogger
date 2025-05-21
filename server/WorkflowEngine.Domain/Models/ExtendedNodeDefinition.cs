@@ -13,7 +13,7 @@ namespace WorkflowEngine.Domain.Models
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
         public string NodeType { get; set; } = "";
-        public object ConfigurationSchemaJson { get; set; } = new();
+        public JsonElement ConfigurationSchemaJson { get; set; } = new();
         public List<PortDefinition> Inputs { get; set; } = new();
         public List<PortDefinition> Outputs { get; set; } = new();
         public VisualMetadata? Visual { get; set; }
@@ -25,7 +25,8 @@ namespace WorkflowEngine.Domain.Models
                 Name,
                 Description,
                 NodeType,
-                JsonSerializer.Serialize(ConfigurationSchemaJson),
+                ConfigurationSchemaJson,
+                //JsonSerializer.Serialize(ConfigurationSchemaJson),
                 Inputs,
                 Outputs
             );
