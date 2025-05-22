@@ -1,8 +1,7 @@
-﻿namespace WorkflowEngine.Api.Models
+﻿namespace WorkflowEngine.Core.Models
 {
-    public class ProjectDto
+    public class CreateProjectRequest
     {
-        public Guid Id { get; set; }
         public string Name { get; set; } = default!; //Can ignore the possible null assignment warning
     }
 }

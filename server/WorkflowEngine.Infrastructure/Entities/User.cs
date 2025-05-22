@@ -10,7 +10,7 @@ namespace WorkflowEngine.Infrastructure.Entities
     {
         public Guid Id { get; set; }
         public string Username { get; set; } = default!;
-        public string PasswordHash { get; set; } = default!;
+        public string? PasswordHash { get; set; } 
         public ICollection<Project> Projects { get; set; } = new List<Project>();
     }
 }

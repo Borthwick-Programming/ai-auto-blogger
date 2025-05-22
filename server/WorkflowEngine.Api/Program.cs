@@ -55,6 +55,8 @@ builder.Services.AddPersistence(builder.Configuration); //persistence setup
 
 builder.Services.AddAuthenticationServices(builder.Configuration);
 
+builder.Services.AddApplicationServices(); //application services setup
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -7,11 +7,21 @@ using Microsoft.EntityFrameworkCore;
 using WorkflowEngine.Infrastructure.Data;
 using static System.Net.Mime.MediaTypeNames;
 using Microsoft.AspNetCore.Authentication.Negotiate;
+using WorkflowEngine.Core.Interfaces;
+using WorkflowEngine.Core.Services;
+
 
 namespace WorkflowEngine.Api.Configuration
 {
     public static class ServiceCollectionExtensions
     {
+
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        {
+            services.AddScoped<IProjectService, ProjectService>();
+            // (adding NodeInstanceService later)
+            return services;
+        }
 
         /// <summary>
         /// Registers an in-memory <see cref="INodeRegistry"/> implementation and
