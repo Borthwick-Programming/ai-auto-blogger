@@ -25,6 +25,7 @@ namespace WorkflowEngine.Api.Controllers
         }
 
         /// <summary>
+        /// GET api/nodes
         /// Returns all registered node definitions.
         /// </summary>
         /// <returns>HTTP 200 OK with a JSON array of node definitions.</returns>

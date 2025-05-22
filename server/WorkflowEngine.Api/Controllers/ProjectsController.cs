@@ -11,7 +11,7 @@ namespace WorkflowEngine.Api.Controllers
     /// All endpoints require Windows-integrated authentication via [Authorize].
     /// //Future implementation will use oauth2.0 and JWT tokens.
     /// </summary>
-    [Route("api/[controller]")]
+    [Route("api/projects")]
     [ApiController]
     public class ProjectsController : ControllerBase
     {
@@ -25,8 +25,8 @@ namespace WorkflowEngine.Api.Controllers
             _projectService = projectService;
         }
 
-        // GET: api/projects
         /// <summary>
+        /// GET: api/projects
         /// Retrieves all projects accessible (authenticated) to the current user.
         /// </summary>
         /// <remarks>This method returns a list of projects that the current user has permission to
@@ -39,8 +39,8 @@ namespace WorkflowEngine.Api.Controllers
             return Ok(projects);
         }
 
-        // GET: api/projects/{id}
         /// <summary>
+        /// GET: api/projects/{id}
         /// Retrieves a project by its unique identifier, if owned by the user.
         /// </summary>
         /// <remarks>This method returns an HTTP 200 response with the project data if the project is
@@ -55,8 +55,8 @@ namespace WorkflowEngine.Api.Controllers
             return project is null ? NotFound() : Ok(project);
         }
 
-        // POST: api/projects
         /// <summary>
+        /// POST: api/projects
         /// Creates a new project for the authenticated user
         /// </summary>
         /// <param name="request"></param>
@@ -68,8 +68,8 @@ namespace WorkflowEngine.Api.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        // DELETE: api/projects/{id}
         /// <summary>
+        /// DELETE: api/projects/{id}
         /// Deletes the project with the specified identifier.
         /// </summary>
         /// <remarks>This action requires the caller to be authenticated and authorized to delete the

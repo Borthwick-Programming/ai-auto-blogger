@@ -5,7 +5,7 @@ using WorkflowEngine.Core.Models;
 
 namespace WorkflowEngine.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/projects/{projectId:guid}/nodeinstances")]
     [ApiController]
     public class NodeInstancesController : ControllerBase
     {
@@ -22,6 +22,7 @@ namespace WorkflowEngine.Api.Controllers
         }
 
         /// <summary>
+        /// GET api/projects/{projectId}/nodeinstances
         /// Retrieves all nodes associated with the specified project for the current user.
         /// </summary>
         /// <remarks>This method requires the caller to be authenticated as the current user is used to
@@ -34,6 +35,7 @@ namespace WorkflowEngine.Api.Controllers
             => Ok(await _nodes.ListAsync(projectId, CurrentUser));
 
         /// <summary>
+        /// GET api/projects/{projectId}/nodeinstances/{nodeId}
         /// Retrieves the details of a specific node within a project.
         /// </summary>
         /// <remarks>This method returns an HTTP 200 response with the node details if the node is found,
@@ -50,6 +52,7 @@ namespace WorkflowEngine.Api.Controllers
         }
 
         /// <summary>
+        /// POST api/projects/{projectId}/nodeinstances
         /// Creates a new node instance within the specified project.
         /// </summary>
         /// <param name="projectId">The unique identifier of the project where the node instance will be created.</param>
@@ -64,6 +67,7 @@ namespace WorkflowEngine.Api.Controllers
         }
 
         /// <summary>
+        /// PUT api/projects/{projectId}/nodeinstances/{nodeId}
         /// Updates an existing node instance within the specified project.
         /// </summary>
         /// <param name="projectId">The unique identifier of the project containing the node instance to update.</param>
@@ -82,6 +86,7 @@ namespace WorkflowEngine.Api.Controllers
         }
 
         /// <summary>
+        /// DELETE api/projects/{projectId}/nodeinstances/{nodeId}
         /// Deletes a node associated with the specified project.
         /// </summary>
         /// <remarks>This operation requires the current user to have appropriate permissions to delete
