@@ -1,3 +1,4 @@
+// vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -7,10 +8,12 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:3000',
+      '/api': {
+        target: 'http://localhost:5015', // your ASP-NET backend
+        changeOrigin: true,              // sets Host header = 5015
+        secure: false,                   // ignore self-signed certs (HTTP is fine)
+      },
     },
   },
-  build: {
-    outDir: 'dist',
-  },
+  build: { outDir: 'dist' },
 })

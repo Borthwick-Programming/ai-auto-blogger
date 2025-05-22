@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WorkflowEngine.Core.Interfaces;
 using WorkflowEngine.Core.Models;
@@ -10,15 +11,16 @@ namespace WorkflowEngine.Api.Controllers
     public class NodeInstancesController : ControllerBase
     {
         private readonly INodeInstanceService _nodes;
-        private string CurrentUser => User.Identity!.Name!;
+        private string _currentUser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NodeInstancesController"/> class.
         /// </summary>
         /// <param name="nodes">The service used to manage node instances.</param>
-        public NodeInstancesController(INodeInstanceService nodes)
+        public NodeInstancesController(INodeInstanceService nodes, ICurrentUserService user)
         {
             _nodes = nodes;
+            _currentUser = user.Username;
         }
 
         /// <summary>
@@ -32,7 +34,7 @@ namespace WorkflowEngine.Api.Controllers
         /// response is returned with an HTTP 200 status code if successful.</returns>
         [HttpGet]
         public async Task<IActionResult> GetAll(Guid projectId)
-            => Ok(await _nodes.ListAsync(projectId, CurrentUser));
+            => Ok(await _nodes.ListAsync(projectId, _currentUser));
 
         /// <summary>
         /// GET api/projects/{projectId}/nodeinstances/{nodeId}
@@ -47,7 +49,7 @@ namespace WorkflowEngine.Api.Controllers
         [HttpGet("{nodeId:guid}")]
         public async Task<IActionResult> Get(Guid projectId, Guid nodeId)
         {
-            var dto = await _nodes.GetAsync(projectId, nodeId, CurrentUser);
+            var dto = await _nodes.GetAsync(projectId, nodeId, _currentUser);
             return dto is null ? NotFound() : Ok(dto);
         }
 
@@ -62,7 +64,7 @@ namespace WorkflowEngine.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Guid projectId, CreateNodeInstanceRequest req)
         {
-            var dto = await _nodes.CreateAsync(projectId, CurrentUser, req);
+            var dto = await _nodes.CreateAsync(projectId, _currentUser, req);
             return CreatedAtAction(nameof(Get), new { projectId, nodeId = dto.Id }, dto);
         }
 
@@ -81,7 +83,7 @@ namespace WorkflowEngine.Api.Controllers
         public async Task<IActionResult> Update(Guid projectId, Guid nodeId, UpdateNodeInstanceRequest req)
         {
             if (nodeId != req.Id) return BadRequest();
-            var ok = await _nodes.UpdateAsync(projectId, CurrentUser, req);
+            var ok = await _nodes.UpdateAsync(projectId, _currentUser, req);
             return ok ? NoContent() : NotFound();
         }
 
@@ -99,7 +101,7 @@ namespace WorkflowEngine.Api.Controllers
         [HttpDelete("{nodeId:guid}")]
         public async Task<IActionResult> Delete(Guid projectId, Guid nodeId)
         {
-            var ok = await _nodes.DeleteAsync(projectId, nodeId, CurrentUser);
+            var ok = await _nodes.DeleteAsync(projectId, nodeId, _currentUser);
             return ok ? NoContent() : NotFound();
         }
     }

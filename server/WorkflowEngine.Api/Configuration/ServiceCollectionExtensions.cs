@@ -16,6 +16,14 @@ namespace WorkflowEngine.Api.Configuration
     public static class ServiceCollectionExtensions
     {
 
+        /// <summary>
+        /// Registers application-specific services into the dependency injection container.
+        /// </summary>
+        /// <remarks>This method adds scoped services for application-specific functionality, including
+        /// implementations of <see cref="IProjectService"/>, <see cref="INodeInstanceService"/>, and <see
+        /// cref="INodeConnectionService"/>.</remarks>
+        /// <param name="services">The <see cref="IServiceCollection"/> to which the services will be added.</param>
+        /// <returns>The updated <see cref="IServiceCollection"/> instance, allowing for method chaining.</returns>
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IProjectService, ProjectService>();

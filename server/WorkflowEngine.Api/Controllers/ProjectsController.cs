@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WorkflowEngine.Core.Interfaces;
 using WorkflowEngine.Core.Models;
@@ -16,13 +17,17 @@ namespace WorkflowEngine.Api.Controllers
     public class ProjectsController : ControllerBase
     {
         private readonly IProjectService _projectService;
+        private string _currentUser;
+
         /// <summary>
-        /// Gets the current Windows user name from the HttpContext.
+        /// Initializes a new instance of the <see cref="ProjectsController"/> class.
         /// </summary>
-        private string CurrentUser => User.Identity?.Name!;
-        public ProjectsController(IProjectService projectService)
+        /// <param name="projectService">The service used to manage project-related operations.</param>
+        /// <param name="user">The service providing information about the current user.</param>
+        public ProjectsController(IProjectService projectService, ICurrentUserService user)
         {
             _projectService = projectService;
+            _currentUser = user.Username;
         }
 
         /// <summary>
@@ -35,7 +40,7 @@ namespace WorkflowEngine.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var projects = await _projectService.ListAsync(CurrentUser);
+            var projects = await _projectService.ListAsync(_currentUser);
             return Ok(projects);
         }
 
@@ -51,7 +56,7 @@ namespace WorkflowEngine.Api.Controllers
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var project = await _projectService.GetAsync(id, CurrentUser);
+            var project = await _projectService.GetAsync(id, _currentUser);
             return project is null ? NotFound() : Ok(project);
         }
 
@@ -64,7 +69,7 @@ namespace WorkflowEngine.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateProjectRequest request)
         {
-            var created = await _projectService.CreateAsync(CurrentUser, request);
+            var created = await _projectService.CreateAsync(_currentUser, request);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
@@ -80,7 +85,7 @@ namespace WorkflowEngine.Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var success = await _projectService.DeleteAsync(id, CurrentUser);
+            var success = await _projectService.DeleteAsync(id, _currentUser);
             return success ? NoContent() : NotFound();
         }
     }

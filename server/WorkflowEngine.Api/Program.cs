@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using System;
 using System.Reflection;
 using WorkflowEngine.Api.Configuration;
+using WorkflowEngine.Api.Services;
+using WorkflowEngine.Core.Interfaces;
 using WorkflowEngine.Domain.Models;
 using WorkflowEngine.Runtime.Interfaces;
 using WorkflowEngine.Runtime.Services;
@@ -24,10 +26,13 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowViteClient", policy =>
         policy.WithOrigins(allowedOrigins ?? Array.Empty<string>())
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials()); // Allow credentials if needed
 });
 
 // Add services to the container.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Add support for MVC-style controllers
 builder.Services.AddControllers(options =>
@@ -74,7 +79,8 @@ if (app.Environment.IsDevelopment())
 
 //Disable forced HTTPS for dev
 //app.UseHttpsRedirection(); 
-
+app.UseCors("AllowViteClient");
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Enable routing to controllers (like NodeDefinitionsController)

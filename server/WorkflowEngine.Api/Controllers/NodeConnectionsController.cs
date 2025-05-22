@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WorkflowEngine.Core.Interfaces;
 using WorkflowEngine.Core.Models;
 
@@ -16,13 +15,17 @@ namespace WorkflowEngine.Api.Controllers
     public class NodeConnectionsController : ControllerBase
     {
         private readonly INodeConnectionService _svc;
-        private string CurrentUser => User.Identity!.Name!;
+        private string _currentUser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NodeConnectionsController"/> class with the specified service.
         /// </summary>
         /// <param name="svc">The service used to manage node connections. Cannot be null.</param>
-        public NodeConnectionsController(INodeConnectionService svc) => _svc = svc;
+        public NodeConnectionsController(INodeConnectionService svc, ICurrentUserService user) 
+        {
+            _svc = svc ?? throw new ArgumentNullException(nameof(svc));
+            _currentUser = user.Username;
+        }
 
         /// <summary>
         /// Retrieves all items associated with the specified project for the current user.
@@ -32,7 +35,7 @@ namespace WorkflowEngine.Api.Controllers
         /// specified project for the current user.</returns>
         [HttpGet]
         public async Task<IActionResult> GetAll(Guid projectId)
-            => Ok(await _svc.ListAsync(projectId, CurrentUser));
+            => Ok(await _svc.ListAsync(projectId, _currentUser));
 
         /// <summary>
         /// Retrieves a specific resource by its unique identifier within the context of a project.
@@ -46,7 +49,7 @@ namespace WorkflowEngine.Api.Controllers
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> Get(Guid projectId, Guid id)
         {
-            var dto = await _svc.GetAsync(projectId, id, CurrentUser);
+            var dto = await _svc.GetAsync(projectId, id, _currentUser);
             return dto is null ? NotFound() : Ok(dto);
         }
 
@@ -60,7 +63,7 @@ namespace WorkflowEngine.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Guid projectId, CreateNodeConnectionRequest req)
         {
-            var dto = await _svc.CreateAsync(projectId, CurrentUser, req);
+            var dto = await _svc.CreateAsync(projectId, _currentUser, req);
             return CreatedAtAction(nameof(Get), new { projectId, id = dto.Id }, dto);
         }
 
@@ -77,7 +80,7 @@ namespace WorkflowEngine.Api.Controllers
         public async Task<IActionResult> Update(Guid projectId, Guid id, UpdateNodeConnectionRequest req)
         {
             if (id != req.Id) return BadRequest();
-            var ok = await _svc.UpdateAsync(projectId, CurrentUser, req);
+            var ok = await _svc.UpdateAsync(projectId, _currentUser, req);
             return ok ? NoContent() : NotFound();
         }
 
@@ -94,7 +97,7 @@ namespace WorkflowEngine.Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid projectId, Guid id)
         {
-            var ok = await _svc.DeleteAsync(projectId, id, CurrentUser);
+            var ok = await _svc.DeleteAsync(projectId, id, _currentUser);
             return ok ? NoContent() : NotFound();
         }
     }
