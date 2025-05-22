@@ -19,6 +19,7 @@ namespace WorkflowEngine.Api.Configuration
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<INodeInstanceService, NodeInstanceService>();
             // (adding NodeInstanceService later)
             return services;
         }

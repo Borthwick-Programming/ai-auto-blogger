@@ -46,9 +46,7 @@ builder.Services.AddSwaggerGen();
 
 // Create an in-memory node registry to hold all available node types.
 // Define the behavior and configuration schema of nodes
-//builder.Services.AddNodeRegistry(); //node setups
 
-//builder.Services.AddNodeDefinitions(builder.Configuration, builder.Environment);//works by itself
 builder.Services.AddNodeDefinitions(builder.Configuration, builder.Environment);
 
 builder.Services.AddPersistence(builder.Configuration); //persistence setup

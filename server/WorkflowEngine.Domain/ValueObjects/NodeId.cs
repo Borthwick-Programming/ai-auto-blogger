@@ -13,6 +13,11 @@ namespace WorkflowEngine.Domain.ValueObjects
     public readonly struct NodeId : IEquatable<NodeId>
     {
         public string Value { get; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NodeId"/> class with the specified value.
+        /// </summary>
+        /// <param name="value">The string value representing the node identifier. Cannot be null, empty, or consist only of whitespace.</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is null, empty, or consists only of whitespace.</exception>
         public NodeId(string value)
         {
             if (string.IsNullOrWhiteSpace(value))

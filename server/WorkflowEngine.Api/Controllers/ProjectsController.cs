@@ -6,11 +6,19 @@ using WorkflowEngine.Core.Models;
 
 namespace WorkflowEngine.Api.Controllers
 {
+    /// <summary>
+    /// Controller to manage user workflow projects.
+    /// All endpoints require Windows-integrated authentication via [Authorize].
+    /// //Future implementation will use oauth2.0 and JWT tokens.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ProjectsController : ControllerBase
     {
         private readonly IProjectService _projectService;
+        /// <summary>
+        /// Gets the current Windows user name from the HttpContext.
+        /// </summary>
         private string CurrentUser => User.Identity?.Name!;
         public ProjectsController(IProjectService projectService)
         {
@@ -18,6 +26,12 @@ namespace WorkflowEngine.Api.Controllers
         }
 
         // GET: api/projects
+        /// <summary>
+        /// Retrieves all projects accessible (authenticated) to the current user.
+        /// </summary>
+        /// <remarks>This method returns a list of projects that the current user has permission to
+        /// access. The result is wrapped in an HTTP 200 OK response.</remarks>
+        /// <returns>An <see cref="IActionResult"/> containing an HTTP 200 OK response with a list of projects.</returns>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -26,6 +40,14 @@ namespace WorkflowEngine.Api.Controllers
         }
 
         // GET: api/projects/{id}
+        /// <summary>
+        /// Retrieves a project by its unique identifier, if owned by the user.
+        /// </summary>
+        /// <remarks>This method returns an HTTP 200 response with the project data if the project is
+        /// found,  or an HTTP 404 response if no project with the specified identifier exists.</remarks>
+        /// <param name="id">The unique identifier of the project to retrieve.</param>
+        /// <returns>An <see cref="IActionResult"/> containing the project data if found;  otherwise, a <see
+        /// cref="NotFoundResult"/> if the project does not exist.</returns>
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -34,6 +56,11 @@ namespace WorkflowEngine.Api.Controllers
         }
 
         // POST: api/projects
+        /// <summary>
+        /// Creates a new project for the authenticated user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Create(CreateProjectRequest request)
         {
@@ -42,6 +69,14 @@ namespace WorkflowEngine.Api.Controllers
         }
 
         // DELETE: api/projects/{id}
+        /// <summary>
+        /// Deletes the project with the specified identifier.
+        /// </summary>
+        /// <remarks>This action requires the caller to be authenticated and authorized to delete the
+        /// specified project.</remarks>
+        /// <param name="id">The unique identifier of the project to delete.</param>
+        /// <returns>A <see cref="NoContentResult"/> if the project was successfully deleted;  otherwise, a <see
+        /// cref="NotFoundResult"/> if the project does not exist.</returns>
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {

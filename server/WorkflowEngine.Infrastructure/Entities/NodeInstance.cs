@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace WorkflowEngine.Infrastructure.Entities
 {
+    /// <summary>
+    /// Represents an instance of a node within a project, including its type, configuration, and position on a canvas.
+    /// </summary>
+    /// <remarks>A <see cref="NodeInstance"/> is associated with a specific project and is identified by a
+    /// unique ID.  It includes metadata such as the node type, configuration settings, and its position on a
+    /// canvas.</remarks>
     public class NodeInstance
     {
         public Guid Id { get; set; }
