@@ -29,18 +29,22 @@ namespace WorkflowEngine.Infrastructure.Data
         public DbSet<Entities.User> Users { get; set; } = default!;
         public DbSet<Entities.Project> Projects { get; set; } = default!;
         public DbSet<Entities.NodeInstance> NodeInstances { get; set; } = default!;
+        public DbSet<NodeConnection> NodeConnections { get; set; }
 
-        /// <summary>
-        /// Configures the model for the database context by defining entity relationships, constraints, and indexes.
-        /// </summary>
-        /// <remarks>This method is called when the model for the context is being created. It is used to
-        /// configure entity relationships, such as one-to-many associations, and to define constraints like unique
-        /// indexes and cascading delete behaviors.  The method ensures: - A unique index is created on the <see
-        /// cref="User.Username"/> property. - A one-to-many relationship between <see cref="Project"/> and <see
-        /// cref="User"/> with cascading delete behavior. - A one-to-many relationship between <see
-        /// cref="NodeInstance"/> and <see cref="Project"/> with cascading delete behavior.  Override this method to
-        /// customize the model configuration further.</remarks>
-        /// <param name="modelBuilder">The <see cref="ModelBuilder"/> used to configure the entity framework model.</param>
+/// <summary>
+/// Configures the entity framework model for the context by defining entity relationships, constraints, and indexes.
+/// </summary>
+/// <remarks>This method is called during the model creation process to define the structure and relationships of
+/// the database schema. It configures the following: <list type="bullet"> <item> <description> A unique index on the
+/// <see cref="User.Username"/> property to ensure that usernames are unique. </description> </item> <item>
+/// <description> A one-to-many relationship between <see cref="Project"/> and <see cref="User"/> where a project is
+/// owned by a user. Deleting a user cascades the deletion of their projects. </description> </item> <item>
+/// <description> A one-to-many relationship between <see cref="NodeInstance"/> and <see cref="Project"/> where a node
+/// instance belongs to a project. Deleting a project cascades the deletion of its node instances. </description>
+/// </item> <item> <description> A one-to-many relationship between <see cref="NodeConnection"/> and <see
+/// cref="NodeInstance"/> for both outgoing and incoming connections. Deleting a node instance cascades the deletion of
+/// its associated connections. </description> </item> </list></remarks>
+/// <param name="modelBuilder">An instance of <see cref="ModelBuilder"/> used to configure the model for the database context.</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -59,6 +63,19 @@ namespace WorkflowEngine.Infrastructure.Data
                 .WithMany(p => p.NodeInstances)
                 .HasForeignKey(n => n.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NodeConnection>()
+                .HasOne(nc => nc.FromNode)
+                .WithMany(n => n.OutgoingConnections)
+                .HasForeignKey(nc => nc.FromNodeInstanceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NodeConnection>()
+                .HasOne(nc => nc.ToNode)
+                .WithMany(n => n.IncomingConnections)
+                .HasForeignKey(nc => nc.ToNodeInstanceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

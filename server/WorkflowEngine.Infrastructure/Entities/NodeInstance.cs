@@ -27,5 +27,8 @@ namespace WorkflowEngine.Infrastructure.Entities
         // Canvas positioning
         public double PositionX { get; set; }
         public double PositionY { get; set; }
+
+        public ICollection<NodeConnection> OutgoingConnections { get; set; } = new List<NodeConnection>();
+        public ICollection<NodeConnection> IncomingConnections { get; set; } = new List<NodeConnection>();
     }
 }

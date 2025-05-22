@@ -20,7 +20,7 @@ namespace WorkflowEngine.Api.Configuration
         {
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<INodeInstanceService, NodeInstanceService>();
-            // (adding NodeInstanceService later)
+            services.AddScoped<INodeConnectionService, NodeConnectionService>();
             return services;
         }
 
