@@ -1,16 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import ReactFlow, {
-  addEdge,
-  MiniMap,
-  Controls,
-  Background,
-} from 'react-flow-renderer';
+import ReactFlow, { addEdge, MiniMap, Controls, Background } from 'react-flow-renderer';
 
 export function WorkflowCanvas({ projectId }) {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
 
-  // Load node instances
+  // Load node instances and connections
   useEffect(() => {
     Promise.all([
       fetch(`/api/projects/${projectId}/nodeinstances`).then(r => r.json()),
@@ -36,11 +31,40 @@ export function WorkflowCanvas({ projectId }) {
     });
   }, [projectId]);
 
+  // Add a new node to the canvas and persist it
+  const onAddNode = useCallback(() => {
+    const payload = {
+      nodeTypeId: 'HttpRequest',       // default node type
+      configurationJson: '{}',          // initial config
+      positionX: 100,                  // default X
+      positionY: 100,                  // default Y
+    };
+
+    fetch(`/api/projects/${projectId}/nodeinstances`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(r => r.json())
+      .then(newNode => {
+        setNodes(nds => [
+          ...nds,
+          {
+            id: newNode.id,
+            type: 'default',
+            position: { x: newNode.positionX, y: newNode.positionY },
+            data: { label: newNode.nodeTypeId },
+          },
+        ]);
+      });
+  }, [projectId]);
+
   // When you drag a node, persist its new position
   const onNodeDragStop = useCallback((_, node) => {
     setNodes(nds =>
       nds.map(n => (n.id === node.id ? { ...n, position: node.position } : n))
     );
+
     fetch(`/api/projects/${projectId}/nodeinstances/${node.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -57,6 +81,7 @@ export function WorkflowCanvas({ projectId }) {
   // When you draw a connection, post it to the API
   const onConnect = useCallback(connection => {
     setEdges(es => addEdge(connection, es));
+
     fetch(`/api/projects/${projectId}/nodeconnections`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -69,17 +94,22 @@ export function WorkflowCanvas({ projectId }) {
     })
       .then(r => r.json())
       .then(saved => {
-        // swap the temporary edge id for the real one
+        // replace temporary edge id with real one
         setEdges(es =>
-          es.map(e =>
-            e.id === connection.id ? { ...e, id: saved.id } : e
-          )
+          es.map(e => (e.id === connection.id ? { ...e, id: saved.id } : e))
         );
       });
   }, [projectId]);
 
   return (
-    <div style={{ width: '100%', height: '80vh' }}>
+    <div style={{ width: '100%', height: '80vh', position: 'relative' }}>
+      <button
+        style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}
+        onClick={onAddNode}
+      >
+        + Add Node
+      </button>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
