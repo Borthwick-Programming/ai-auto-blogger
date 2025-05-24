@@ -2,17 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WorkflowEngine.Infrastructure.Data;
 
 #nullable disable
 
-namespace WorkflowEngine.Infrastructure.Migrations
+namespace WorkflowEngine.Infrastructure.Migrations.User
 {
     [DbContext(typeof(WorkflowEngineDbContext))]
-    partial class WorkflowEngineDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250524054859_AddCreatedAtAndRemovePasswordHash")]
+    partial class AddCreatedAtAndRemovePasswordHash
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");

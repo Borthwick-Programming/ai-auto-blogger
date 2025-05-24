@@ -27,6 +27,7 @@ namespace WorkflowEngine.Api.Services
             {
                 throw new InvalidOperationException("User must be authenticated");
             }
+            Console.WriteLine($"(CurrentUserService) Current dev user is: {Username}");
         }
     }
 }

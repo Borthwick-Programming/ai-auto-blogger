@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using System;
 using System.Reflection;
+using WorkflowEngine.Api.Auth;
 using WorkflowEngine.Api.Configuration;
 using WorkflowEngine.Api.Services;
 using WorkflowEngine.Core.Interfaces;
@@ -62,7 +65,26 @@ builder.Services.AddNodeDefinitions(builder.Configuration, builder.Environment);
 
 builder.Services.AddPersistence(builder.Configuration); //persistence setup
 
-builder.Services.AddAuthenticationServices(builder.Configuration);
+//For dev, we nmeed a call with an inline, environment-aware block
+//builder.Services.AddAuthenticationServices(builder.Configuration); //old line
+if (builder.Environment.IsDevelopment())
+{
+    // In Development, use a fake "Test" scheme that always authenticates you as the dev user
+    builder.Services
+           .AddAuthentication("Dev")
+           .AddScheme<AuthenticationSchemeOptions, DevAuthHandler>(
+                "Dev", options => { })
+               .Services.AddSingleton<IConfiguration>(builder.Configuration);
+}
+else
+{
+    // In Production, use real Windows Negotiate
+    builder.Services
+           .AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+           .AddNegotiate();
+}
+builder.Services.AddAuthorization();
+
 
 builder.Services.AddApplicationServices(); //application services setup
 

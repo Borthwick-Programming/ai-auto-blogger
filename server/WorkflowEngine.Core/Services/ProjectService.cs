@@ -34,13 +34,22 @@ namespace WorkflowEngine.Core.Services
         /// <returns>A <see cref="User"/> object representing the existing or newly created user.</returns>
         private async Task<User> GetOrCreateUser(string windowsName)
         {
-            var user = await _db.Users.SingleOrDefaultAsync(u => u.Username == windowsName);
-            if (user != null) return user;
+            windowsName = windowsName.ToLower().Trim();
+            var existing = await _db.Users
+                .Where(u => u.Username.ToLower() == windowsName)
+                .FirstOrDefaultAsync();
+            if (existing != null) return existing;
+            var newUser = new User
+            {
+                Id = Guid.NewGuid(),
+                Username = windowsName,
+            };
 
-            user = new User { Id = Guid.NewGuid(), Username = windowsName };
-            _db.Users.Add(user);
+            _db.Users.Add(newUser);
             await _db.SaveChangesAsync();
-            return user;
+
+            return newUser;
+
         }
 
         /// <summary>

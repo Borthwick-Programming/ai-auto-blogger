@@ -28,6 +28,7 @@ namespace WorkflowEngine.Api.Controllers
         {
             _projectService = projectService;
             _currentUser = user.Username;
+            Console.WriteLine($"(ProjectsController)Fetching projects for user: {_currentUser}");
         }
 
         /// <summary>

@@ -5,17 +5,14 @@ function App() {
   const [projects, setProjects] = useState(null)
   const [error, setError]     = useState(null)
 
-  useEffect(() => {
-    fetch('http://localhost:5015/api/projects', { credentials: 'include' })
-    //fetch('/api/projects')
-    //fetch('http://localhost:5015/api/projects')
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.json()
-      })
-      .then(data => setProjects(data))
-      .catch(err => setError(err.message))
-  }, [])
+useEffect(() => {
+  fetch('/api/projects')
+    .then(res => res.json())
+    .then(data => {
+      console.log("(App.jsx)",data); 
+      setProjects(data);
+    });
+}, []);
 
   if (error) return <div className="error">Error: {error}</div>
   if (projects === null) return <div>Loading projects…</div>
@@ -24,15 +21,18 @@ function App() {
   return (
     <div className="App">
       <h1>Your Workflow Projects</h1>
-      <ul>
+      <select onChange={e => setActive(e.target.value)}>
+        <option value="">-- pick a project --</option>
         {projects.map(p => (
-          <li key={p.id}>
-            {p.name} <small>({p.id})</small>
-          </li>
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
         ))}
-      </ul>
+      </select>
+
+      {active && <WorkflowCanvas projectId={active} />}
     </div>
-  )
+  );
 }
 
 export default App
