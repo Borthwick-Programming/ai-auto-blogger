@@ -1,126 +1,221 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import ReactFlow, { addEdge, MiniMap, Controls, Background } from 'react-flow-renderer';
+// src/components/WorkflowCanvas.jsx
+import React, { useState, useEffect, useCallback} from 'react';
+import ReactFlow, { MiniMap, Controls, Background, useNodesState, useEdgesState } from 'react-flow-renderer';
+import HttpRequestNode from './nodes/HttpRequestNode';
+import ConditionalBranchNode from './nodes/ConditionalBranchNode';
+import { Listbox } from '@headlessui/react'
+import './WorkflowCanvas.css';
 
-export function WorkflowCanvas({ projectId }) {
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
+const nodeTypes = {
+  'http-request': HttpRequestNode,
+  'conditional-branch': ConditionalBranchNode,
+};
 
-  // Load node instances and connections
-  useEffect(() => {
-    Promise.all([
-      fetch(`/api/projects/${projectId}/nodeinstances`).then(r => r.json()),
-      fetch(`/api/projects/${projectId}/nodeconnections`).then(r => r.json()),
-    ]).then(([instances, connections]) => {
-      setNodes(
-        instances.map(n => ({
-          id: n.id,
-          type: 'default',
-          position: { x: n.positionX, y: n.positionY },
-          data: { label: n.nodeTypeId },
-        }))
-      );
-      setEdges(
-        connections.map(c => ({
-          id: c.id,
-          source: c.fromNodeInstanceId,
-          sourceHandle: c.fromPortName,
-          target: c.toNodeInstanceId,
-          targetHandle: c.toPortName,
-        }))
-      );
-    });
-  }, [projectId]);
+export default function WorkflowCanvas({ projectId }) {
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [nodeDefs, setNodeDefs] = useState([]);
+  // use controlled state hooks for React Flow
 
-  // Add a new node to the canvas and persist it
-  const onAddNode = useCallback(() => {
-    const payload = {
-      nodeTypeId: 'HttpRequest',       // default node type
-      configurationJson: '{}',          // initial config
-      positionX: 100,                  // default X
-      positionY: 100,                  // default Y
-    };
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-    fetch(`/api/projects/${projectId}/nodeinstances`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then(r => r.json())
-      .then(newNode => {
-        setNodes(nds => [
-          ...nds,
-          {
-            id: newNode.id,
-            type: 'default',
-            position: { x: newNode.positionX, y: newNode.positionY },
-            data: { label: newNode.nodeTypeId },
-          },
-        ]);
-      });
-  }, [projectId]);
-
-  // When you drag a node, persist its new position
-  const onNodeDragStop = useCallback((_, node) => {
-    setNodes(nds =>
-      nds.map(n => (n.id === node.id ? { ...n, position: node.position } : n))
+   // -- handlers ---------------------------------------------------------
+   // drag-stop - PUT new position
+const onNodeDragStop = useCallback((_, n) => {
+  setNodes(nds =>
+    nds.map(x => (x.id === n.id ? { ...x, position: n.position } : x))
     );
-
-    fetch(`/api/projects/${projectId}/nodeinstances/${node.id}`, {
+    fetch(`/api/projects/${selectedProject}/nodeinstances/${n.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id: node.id,
-        nodeTypeId: node.data.label,
-        configurationJson: '{}', // preserve existing config
-        positionX: node.position.x,
-        positionY: node.position.y,
-      }),
-    });
-  }, [projectId]);
+        id: n.id,
+        nodeTypeId: n.data.nodeType,
+        configurationJson: n.data.configurationJson || '{}',
+        positionX: n.position.x,
+        positionY: n.position.y,
+        }),
+        }).catch(console.error);
+        }, [selectedProject, setNodes]);
 
-  // When you draw a connection, post it to the API
-  const onConnect = useCallback(connection => {
-    setEdges(es => addEdge(connection, es));
+        // delete nodes → DELETE endpoint
+const onNodesDelete = useCallback(del => {
+  del.forEach(n =>
+    fetch(`/api/projects/${selectedProject}/nodeinstances/${n.id}`, {
+       method: 'DELETE',
+       }).catch(console.error)
+       );
+       }, [selectedProject]);
 
-    fetch(`/api/projects/${projectId}/nodeconnections`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fromNodeInstanceId: connection.source,
-        fromPortName: connection.sourceHandle,
-        toNodeInstanceId: connection.target,
-        toPortName: connection.targetHandle,
-      }),
-    })
+       // delete edges → DELETE endpoint
+       const onEdgesDelete = useCallback(del => {
+        del.forEach(e =>
+          fetch(`/api/projects/${selectedProject}/nodeconnections/${e.id}`, {
+             method: 'DELETE',
+             }).catch(console.error)
+             );
+             }, [selectedProject]);
+
+
+   // track clicked node for configuration
+    const [configNode, setConfigNode] = useState(null);
+    const [configPos, setConfigPos]   = useState({ top: 0, left: 0 });
+    //const onNodeClick = useCallback((_, n) => setConfigNode(n), []);
+     // capture the node and its screen position relative to  canvas-wrapper
+     const onNodeClick = useCallback((event, node) => {
+      setConfigNode(node);
+      // find the node's DOM element
+      const nodeEl = document.querySelector(
+         `.react-flow__node[data-id="${node.id}"]`
+         );
+         const wrapper = document.querySelector('.canvas-wrapper');
+         if (nodeEl && wrapper) {
+          const nodeRect    = nodeEl.getBoundingClientRect();
+          const wrapperRect = wrapper.getBoundingClientRect();
+          // position panel just to the right of the node, aligned to its top
+          setConfigPos({
+            top:  nodeRect.top   - wrapperRect.top,
+            left: nodeRect.left  - wrapperRect.left + nodeRect.width + 8,
+            });
+            }
+            }, []);
+
+  // load projects and definitions once
+useEffect(() => {
+  async function loadLookups() {
+    try {
+      const projRes = await fetch('/api/projects');
+      if (!projRes.ok) throw new Error(`Projects ${projRes.status}`);
+      const nodeRes = await fetch('/api/nodes');
+      if (!nodeRes.ok) throw new Error(`Nodes ${nodeRes.status}`);
+
+      setProjects(await projRes.json());
+      setNodeDefs(await nodeRes.json());
+    } catch (err) {
+      console.error('Lookup load failed:', err);
+      // optional: set an error state and render a message
+    }
+  }
+  loadLookups();
+}, []);
+
+  // when project or defs change, load instances + connections
+  useEffect(() => {
+    if (!selectedProject) return;
+    // nodes
+    fetch(`/api/projects/${selectedProject}/nodeinstances`)
       .then(r => r.json())
-      .then(saved => {
-        // replace temporary edge id with real one
-        setEdges(es =>
-          es.map(e => (e.id === connection.id ? { ...e, id: saved.id } : e))
-        );
-      });
-  }, [projectId]);
+      .then(list =>
+        setNodes(
+          list.map(n => ({
+            id: n.id,
+            type: n.nodeTypeId,         // matches our nodeTypes keys
+            position: { x: n.positionX, y: n.positionY },
+            data: {
+              label:
+                nodeDefs.find(d => d.nodeType === n.nodeTypeId)?.name ||
+                n.nodeTypeId,
+               nodeType: n.nodeTypeId,             // <- needed by drag-stop PUT
+               configurationJson: n.configurationJson
+            },
+          }))
+        )
+      );
+    // edges
+    fetch(`/api/projects/${selectedProject}/nodeconnections`)
+      .then(r => r.json())
+      .then(list =>
+        setEdges(
+          list.map(c => ({
+            id: c.id,
+            source: c.fromNodeInstanceId,
+            sourceHandle: c.fromPortName,
+            target: c.toNodeInstanceId,
+            targetHandle: c.toPortName,
+          }))
+        )
+      );
+  }, [selectedProject, nodeDefs]);
 
   return (
-    <div style={{ width: '100%', height: '80vh', position: 'relative' }}>
-      <button
-        style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}
-        onClick={onAddNode}
-      >
-        + Add Node
-      </button>
+    <div className="workflow-container">
+      <header className="workflow-header">
+  <h1 style={{ marginRight: '1rem' }}>Your Workflow Projects</h1>
 
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodeDragStop={onNodeDragStop}
-        onConnect={onConnect}
-        fitView
-      >
-        <MiniMap />
-        <Controls />
-        <Background />
-      </ReactFlow>
+  {/* Project picker */}
+  <Listbox value={selectedProject} onChange={setSelectedProject}>
+    <div style={{ position: 'relative' }}>
+      {/* The button that shows the current selection */}
+      <Listbox.Button className="dropdown-button">
+        {selectedProject
+          ? projects.find(p => p.id === selectedProject)?.name
+          : '— pick a project —'}
+      </Listbox.Button>
+
+      {/* The actual dropdown menu */}
+      <Listbox.Options className="dropdown-options">
+        {projects.map(p => (
+          <Listbox.Option
+            key={p.id}
+            value={p.id}
+            className={({ active }) =>
+              `dropdown-option ${active ? 'active' : ''}`
+            }
+          >
+            {p.name}
+          </Listbox.Option>
+        ))}
+      </Listbox.Options>
+    </div>
+  </Listbox>
+</header>
+
+      <div className="canvas-wrapper">
+        {selectedProject && (
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+           onNodeDragStop={onNodeDragStop}
+           onNodesDelete={onNodesDelete}
+           onEdgesDelete={onEdgesDelete}
+           onNodeClick={onNodeClick}
+            fitView
+          >
+            <MiniMap />
+            <Controls />
+            <Background />
+          </ReactFlow>
+          
+        )}
+
+        {configNode && (
+          <div className="config-panel" style={{ top: configPos.top, left: configPos.left }}>
+
+            <h3>{configNode.data.label} Configuration</h3>
+            <p><b>ID:</b> {configNode.id}</p>
+            <p><b>Type:</b> {configNode.data.nodeType}</p>
+
+      {/* TODO: replace with a real Form once schemas are ready */}
+      {configNode.data.configurationJson && configNode.data.configurationJson !== '{}'? 
+      (
+        <textarea style={{ width: '100%', height: 80 }} defaultValue={configNode.data.configurationJson}/>
+      ) : 
+      (
+        <p className="no-config">No configuration available.</p>
+      )
+      }
+
+        <button style={{ marginTop: 8 }}>Save</button>
+        <button style={{ marginLeft: 8 }} onClick={() => setConfigNode(null)}>
+        Close
+        </button>
+        </div>
+      )}
+      </div>
     </div>
   );
 }
