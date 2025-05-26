@@ -1,0 +1,98 @@
+/* src/components/WorkflowCanvas.css */
+
+/* Overall page background */
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #cceeff;  /* darker pastel blue */
+}
+
+.workflow-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;             /* take full viewport height */
+}
+
+.workflow-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.canvas-wrapper {
+  flex: 1;                   /* grow to fill remaining height */
+  background: #e6f7ff;       /* pastel-blue canvas background */
+  position: relative;
+}
+
+/* Optional: center the dropdown under the title */
+.workflow-header select {
+  margin-left: 1rem;
+}
+
+/* Ensure React Flow container fills its parent */
+.canvas-wrapper .react-flow {
+  width: 100%;
+  height: 100%;
+}
+
+/* CONFIG PANEL ----------------------------------------------------- */
+.config-panel {
+  position: absolute;
+  background: #fff;
+  color: #333;           
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  padding: 1rem;
+  font-family: sans-serif;
+  width: 260px;
+  z-index: 10;   
+}
+.config-panel h3 {
+  margin-top: 0;
+  color: #222;
+}
+
+.no-config {
+  font-style: italic;
+  color: #666;
+  margin: 1rem 0;
+}
+
+/* project select dropdown */
+.dropdown-button {
+  background: #fff;
+  color: #333;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  min-width: 220px;
+  text-align: left;
+}
+
+.dropdown-options {
+  position: absolute;
+  z-index: 10;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+  color: #333;
+}
+
+.dropdown-option {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+   color: #333;
+}
+
+.dropdown-option.active, .dropdown-option:hover {
+  background-color: #e6f7ff;
+   color: #333;
+}
