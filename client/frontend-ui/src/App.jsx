@@ -1,10 +1,6 @@
-import { useState, useEffect } from 'react'
+import WorkflowPage from './pages/WorkflowPage';
 
-import  WorkflowCanvas  from './components/WorkflowCanvas'
-import './App.css'
-
-function App() {
-  return <WorkflowCanvas />;
+export default function App() {
+  return <WorkflowPage />;
 }
 
-export default App
