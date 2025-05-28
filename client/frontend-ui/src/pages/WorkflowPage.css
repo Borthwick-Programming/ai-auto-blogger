@@ -1,14 +1,16 @@
 :root[data-theme='light']{
-  --bg:#f9f9ff;
-  --text:#222;
-  --header-bg:#fff;
-  --accent:#007acc;
+  --bg:           #f9f9ff;
+  --canvas-bg:    #e9f4fc;   /* dotted grid light */
+  --text:         #222;
+  --header-bg:    #333;
+  --accent:       #007acc;
 }
 :root[data-theme='dark']{
-  --bg:#1e1e1e;
-  --text:#ddd;
-  --header-bg:#2a2a2a;
-  --accent:#569cd6;
+  --bg:           #1e1e1e;
+  --canvas-bg:    #202a34;   /* a dark steel blue */
+  --text:         #ddd;
+  --header-bg:    #292929;
+  --accent:       #569cd6;
 }
 /* default to light */
 :root:not([data-theme]){ --bg:#f9f9ff; --text:#222; --header-bg:#fff; --accent:#007acc; }
@@ -34,21 +36,46 @@ body{ margin:0; background:var(--bg); color:var(--text); }
   border:2px solid var(--accent);
   border-radius:4px;
 }
+
+/* ==================== THEME PILL ==================== */
 .theme-btn{
-  width:24px; height:14px;        /* little pill */
-  border-radius:999px;
-  position:relative;
-  background:var(--accent);
-  border:none; cursor:pointer;
-  transition:background .2s;
+  --size: 26px;                        /* knob diameter   */
+  width: calc(var(--size) * 2);        /* pill width      */
+  height: var(--size);
+  border-radius: var(--size);
+  padding: 0;
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  position: relative;
+  cursor: pointer;
+  transition: background .25s, border-color .25s;
+  /* remove default button styles that Edge applies */
+  color: transparent;       /* hide accidental focus outline */
 }
+
+/* -- white knob */
 .theme-btn::after{
-  content:'';
-  position:absolute;
-  top:2px; left:2px;
-  width:10px; height:10px;
-  border-radius:50%; background:#fff;
-  transition:transform .2s;
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;                           /* LIGHT → knob-left */
+  width: calc(var(--size) - 4px);
+  height: calc(var(--size) - 4px);
+  border-radius: 50%;
+  background: #fff;
+  transition: transform .25s ease;
+  transform: translateX(0);            /* make explicit base state */
+}
+
+/* Dark-mode overrides ***MUST*** come *after* the base block above */
+:root[data-theme='dark'] .theme-btn{
+  background: #555;
+  border-color: #555;
+}
+
+:root[data-theme='dark'] .theme-btn::after{
+  /* move knob fully to the right edge */
+  transform: translateX(calc(var(--size) - 4px));
 }
 
 .wf-canvas{ flex:1; position:relative; }
@@ -56,4 +83,15 @@ body{ margin:0; background:var(--bg); color:var(--text); }
   position:absolute; top:50%; left:50%;
   transform:translate(-50%,-50%);
   font-size:1.2rem; color:var(--text);
+}
+
+/* Visually tweak option highlight */
+select option:hover,
+select option:focus {
+  background: var(--accent);
+  color: #fff;
+}
+select option:checked {
+  background: var(--accent);
+  color: #fff;
 }

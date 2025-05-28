@@ -6,7 +6,7 @@ import useApiStatus      from '../hooks/useApiStatus';
 import ApiStatusBanner   from '../components/ApiStatusBanner';
 
 export default function WorkflowPage() {
-  const { online } = useApiStatus();
+  const { online, trying, restart } = useApiStatus();
   const [projects, setProjects]   = useState([]);
   const [projectId, setProjectId] = useState('');
 
@@ -38,8 +38,8 @@ export default function WorkflowPage() {
         aria-label="Toggle light/dark theme"
         onClick={() => {
           const root = document.documentElement;
-          root.dataset.theme =
-            root.dataset.theme === 'light' ? 'dark' : 'light';
+          const current = root.dataset.theme; 
+          root.dataset.theme =  current === 'light' ? 'dark' : 'light';
         }}
       />
     </>
@@ -47,14 +47,27 @@ export default function WorkflowPage() {
 </header>
 
       <main className="wf-canvas">
-        {online ? ( /* Only run when backend is up */
-            projectId ? <Canvas projectId={projectId} />   /* project picked → render canvas */
-            : <p className="wf-hint">Select a project to load its workflow.</p>)
-            : 
-            (
-            <p className="wf-hint">Waiting for backend…</p>
-            )}
-        </main>
+        {
+        online ? 
+        (
+          projectId ? <Canvas projectId={projectId} />
+          : 
+          <p className="wf-hint">Select a project to load its workflow.</p>
+        ) 
+          : 
+          trying ? 
+        (
+          <p className="wf-hint">Waiting for backend…</p>
+        ) 
+          : 
+        (
+          <div className="wf-hint">
+          <p>Backend is still offline.</p>
+          <button onClick={restart}>Retry</button>
+          </div>
+        )
+      }
+      </main>
     </div>
   );
 }

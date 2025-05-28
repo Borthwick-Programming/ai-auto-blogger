@@ -9,7 +9,8 @@ import ReactFlow, {
 } from 'reactflow';
 
 
-import ConfigDrawer from './ConfigDrawer';
+//import ConfigDrawer from './ConfigDrawer';
+import ConfigPopover from './ConfigPopover';
 import * as api from '../api/workflowengine';
 
 import 'reactflow/dist/style.css';   // base RF styles
@@ -79,13 +80,16 @@ export default function Canvas({ projectId }) {
           nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onNodeDrag={(_, dragNode) => {
+            window.dispatchEvent(new CustomEvent('nodeDrag', { detail: dragNode }));
+          }}
           onNodeDragStop={onNodeDragStop}
           onNodeClick={onNodeClick}
           onConnect={params => setEdges(eds => addEdge(params, eds))}
           fitView
         />
 
-        <ConfigDrawer
+        <ConfigPopover
           node={selNode}
           onSave={handleSaveConfig}
           onClose={() => setSelNode(null)}

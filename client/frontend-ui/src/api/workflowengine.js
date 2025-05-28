@@ -15,14 +15,15 @@ export const getNodeDefinitions  = () => fetch(`${base}/nodes`).then(r => r.json
 export const getInstances        = pid => fetch(`${base}/projects/${pid}/nodeinstances`).then(r => r.json());
 export const getConnections      = pid => fetch(`${base}/projects/${pid}/nodeconnections`).then(r => r.json());
 
-export const saveInstancePos = (pid,id,p,pos) =>
-  safeFetch(`${base}/projects/${pid}/nodeinstances/${id}`,{
-    method:'PUT',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
+// <<save-instance-pos>>
+export const saveInstancePos = (pid, id,nodeTypeId, pos) =>
+  safeFetch(`/api/projects/${pid}/nodeinstances/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
       id,
-      nodeTypeId:p,
-      positionX:pos.x,
-      positionY:pos.y,
-    })
+      nodeTypeId,
+      positionX: pos.x,   
+      positionY: pos.y
+    }),
   });
