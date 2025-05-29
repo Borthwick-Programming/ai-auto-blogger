@@ -1,11 +1,13 @@
-import React from 'react';
 import './ApiStatusBanner.css';
 
-export default function ApiStatusBanner({ online }) {
+export default function ApiStatusBanner({ online, trying, attempt, currentMs }) {
   if (online) return null;
+
   return (
     <div className="api-banner">
-      <span>⚠️  Backend API is offline – retrying&nbsp;…</span>
+      {trying
+        ? <>⚠️ Backend API is offline – attempt {attempt} every {currentMs/1000} s</>
+        : <>⚠️ Backend API is offline.</>}
     </div>
   );
 }

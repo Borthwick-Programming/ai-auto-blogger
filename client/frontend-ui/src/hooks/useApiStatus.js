@@ -1,65 +1,59 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-/*  5 s × 1 min  →  10 s × 1 min  →  60 s × 1 min  →  stop  */
 const phases = [
-  { interval: 5_000,  duration: 60_000 },
-  { interval: 10_000, duration: 60_000 },
-  { interval: 60_000, duration: 60_000 },
+  { interval: 5_000,  duration: 60_000 },  // 0-1 min
+  { interval:10_000,  duration: 60_000 },  // 1-2 min
+  { interval:60_000,  duration: 60_000 },  // 2-3 min
 ];
 
 export default function useApiStatus() {
-  const [online, setOnline] = useState(true);   // optimistic first load
-  const [trying, setTrying] = useState(true);
+  const [online,   setOnline]   = useState(true);
+  const [trying,   setTrying]   = useState(true);
+  const [attempt,  setAttempt]  = useState(0);      
+  const [currentMs,setCurrentMs]= useState(phases[0].interval); 
 
-  const phaseRef     = useRef(0);               // 0,1,2
-  const timeoutRef   = useRef();                // phase-switch timer
-  const intervalRef  = useRef();                // ping timer
+  const phaseRef    = useRef(0);
+  const timeoutRef  = useRef();
+  const intervalRef = useRef();
 
-  /* ---- single ping ---- */
   const ping = useCallback(() => {
+    setAttempt(a => a + 1);                          // count every try
     fetch('/api/health')
       .then(r => r.ok ? setOnline(true) : setOnline(false))
       .catch(()   => setOnline(false));
   }, []);
 
-  /* ---- schedule a whole phase ---- */
   const schedulePhase = useCallback(() => {
     if (phaseRef.current >= phases.length) {
-      setTrying(false);                         // out of phases → stop
+      setTrying(false);
       return;
     }
-
     const { interval, duration } = phases[phaseRef.current];
+    setCurrentMs(interval);                          // expose to UI
 
-    /* start interval for this phase */
     ping();
     intervalRef.current = setInterval(ping, interval);
 
-    /* queue switch to next phase */
     timeoutRef.current = setTimeout(() => {
       clearInterval(intervalRef.current);
       phaseRef.current += 1;
-      schedulePhase();                          // recurse
+      schedulePhase();
     }, duration);
   }, [ping]);
 
-  /* ---- initial mount ---- */
   useEffect(() => {
     schedulePhase();
-    return () => {                              // cleanup on unmount
-      clearTimeout(timeoutRef.current);
-      clearInterval(intervalRef.current);
-    };
+    return () => { clearTimeout(timeoutRef.current); clearInterval(intervalRef.current); };
   }, [schedulePhase]);
 
-  /* ---- manual restart ---- */
   const restart = useCallback(() => {
-    clearTimeout(timeoutRef.current);
-    clearInterval(intervalRef.current);
+    clearTimeout(timeoutRef.current); clearInterval(intervalRef.current);
     phaseRef.current = 0;
+    setAttempt(0);           // reset counter
     setTrying(true);
     schedulePhase();
   }, [schedulePhase]);
 
-  return { online, trying, restart };
+  /* return the new values */
+  return { online, trying, attempt, currentMs, restart };
 }
