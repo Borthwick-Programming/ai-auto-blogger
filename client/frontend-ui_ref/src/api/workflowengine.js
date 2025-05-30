@@ -14,6 +14,15 @@ export const getProjects         = () => fetch(`${base}/projects`).then(r => r.j
 export const getNodeDefinitions  = () => fetch(`${base}/nodes`).then(r => r.json());
 export const getInstances        = pid => fetch(`${base}/projects/${pid}/nodeinstances`).then(r => r.json());
 export const getConnections      = pid => fetch(`${base}/projects/${pid}/nodeconnections`).then(r => r.json());
+export const createNode = (pid, dto) =>
+  safeFetch(
+    `/api/projects/${pid}/nodeinstances`,
+     { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(dto) }
+    );
+ export const deleteNode = (pid, nid) => safeFetch(
+  `/api/projects/${pid}/nodeinstances/${nid}`,
+   { method:'DELETE' }
+  );
 
 // <<save-instance-pos>>
 export const saveInstancePos = (
@@ -47,7 +56,7 @@ export const saveInstancePos = (
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       id:         node.id,
-      nodeTypeId: node.type,
+      nodeTypeId: node.nodeTypeId,
       configurationJson: node.data.configurationJson,
       positionX:  node.position.x,
       positionY:  node.position.y,
