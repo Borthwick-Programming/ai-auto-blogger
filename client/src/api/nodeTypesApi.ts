@@ -1,17 +1,17 @@
-// src/api/nodetypes.ts
+// src/api/nodeTypesApi.ts
+
 export interface NodeDefinition {
   id: string;
   name: string;
   description: string;
   reactComponent: string;
   icon?: string;
-  // add whatever else you return
 }
 
 const base = '/api/nodes';
 
 // generic helper to keep code DRY
-const json = <T>(r: Response) => r.json() as Promise<T>;
+const json = <T,>(r: Response) => r.json() as Promise<T>;
 
 export const getAllNodeTypes = () => fetch(base).then(r => json<NodeDefinition[]>(r));
 export const getNodeType     = (id: string) =>

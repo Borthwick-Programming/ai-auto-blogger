@@ -12,9 +12,10 @@ import {
   type Edge,
   type Connection,
 } from '@xyflow/react';
+
 import '@xyflow/react/dist/style.css';
 
-import { NODE_TYPES, EDGE_TYPES } from '../nodeTypes';
+import { NODE_TYPES, EDGE_TYPES } from './nodeRegistry';
 
 /* ---------- Custom node-data payload ---------- */
 interface CanvasNodeData extends Record<string, unknown> {
