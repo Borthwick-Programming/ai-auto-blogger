@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ReactFlowProvider,
   ReactFlow,
   addEdge,
   useNodesState,
@@ -17,6 +18,11 @@ import '@xyflow/react/dist/style.css';
 
 import { NODE_TYPES, EDGE_TYPES } from './nodeRegistry';
 
+import { createNodeInstance, updateNodeInstance } from '../api/nodeInstancesApi';
+
+import type { ReactFlowInstance } from '@xyflow/react';
+import { useRef } from 'react';
+
 /* ---------- Custom node-data payload ---------- */
 interface CanvasNodeData extends Record<string, unknown> {
   configuration: Record<string, unknown>;
@@ -33,7 +39,7 @@ interface WorkflowCanvasProps {
   projectId: string;
   apiBaseUrl?: string;
 }
-/* --------------------------------------------- */
+/* --------------------------------------------- */ 
 
 const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
   projectId,
@@ -42,6 +48,8 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
   /* --- React-Flow state hooks ----------------- */
   const [nodes, setNodes, onNodesChange]   = useNodesState<CanvasNode>([]);
   const [edges, setEdges, onEdgesChange]   = useEdgesState<CanvasEdge>([]);
+  const rf = useRef<ReactFlowInstance<CanvasNode, CanvasEdge> | null>(null);
+
   /* ------------------------------------------- */
 
   const [isLoading, setIsLoading] = useState(true);
@@ -95,12 +103,78 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
 
   useEffect(() => { loadWorkflow(); }, [loadWorkflow]);
 
+  // addDragHandlers                               // <<drag-drop>>
+const onDragOver = useCallback(
+  (evt: React.DragEvent) => {
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'move';
+  },
+  [],
+);
+
+const onDrop = useCallback(
+  async (evt: React.DragEvent) => {
+    evt.preventDefault();
+    const data = evt.dataTransfer.getData('application/reactflow');
+    if (!data) return;
+
+    const def = JSON.parse(data) as { id: string; name: string };
+    const bounds = (evt.target as HTMLDivElement).getBoundingClientRect();
+    
+    if (!rf.current) return;
+    
+    const position = rf.current!.screenToFlowPosition({
+      x: evt.clientX - bounds.left,
+      y: evt.clientY - bounds.top,
+    });
+
+    // 1. Persist to API
+    const created = await createNodeInstance(projectId, {
+      nodeTypeId: def.id,
+      configurationJson: '{}',
+      positionX: position.x,
+      positionY: position.y,
+    });
+
+    // 2. Add to local RF state
+    setNodes(ns => [
+      ...ns,
+      {
+        id: created.id,
+        type: created.nodeTypeId,
+        position,
+        data: {
+          configuration: {},
+          nodeTypeId: created.nodeTypeId,
+          nodeId: created.id,
+        },
+      },
+    ]);
+  },
+  [projectId, setNodes],
+);
+
+/* hook to save position changes ------------- */  // <<drag-drop>>
+const onNodeDragStop = useCallback(
+  (_: unknown, node: Node<CanvasNodeData>) => {
+    updateNodeInstance(projectId, node.id, {
+      ...node.data,
+      positionX: node.position.x,
+      positionY: node.position.y,
+    }).catch(console.error);
+  },
+  [projectId],
+);
+
+
+
   if (isLoading) return <div>Loading workflow…</div>;
   if (error)     return <div>Error: {error}</div>;
 
   return (
-    <div style={{ width: '100%', height: '100vh' }}>
-      <ReactFlow
+    <div className="canvas">
+      <ReactFlowProvider>
+      <ReactFlow style={{ width: '100%', height: '100%' }} 
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
@@ -108,12 +182,18 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
         onConnect={(params: Connection) => setEdges(eds => addEdge(params, eds))}
         connectionMode={ConnectionMode.Loose}
         fitView
+        onInit={(instance) => (rf.current = instance)}
         nodeTypes={NODE_TYPES}
         edgeTypes={EDGE_TYPES}
+        
+        onDragOver={onDragOver}          // <<drag-drop>>
+        onDrop={onDrop}                  // <<drag-drop>>
+        onNodeDragStop={onNodeDragStop}  // <<drag-drop>>
       >
         <Controls />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
+      </ReactFlowProvider>
     </div>
   );
 };

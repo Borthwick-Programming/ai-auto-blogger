@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import WorkflowCanvas from './components/WorkflowCanvas.tsx';
+import NodePalette from './components/NodePalette.tsx';
 import './App.css';
 
 interface Project {
@@ -88,8 +89,8 @@ function App() {
   }
 
   return (
-    <div className="app">
-      {/* Header */}
+    <div className="app"> {/* FLEX column root */}
+      {/* ---------- HEADER ---------- */}
       <header className="app-header">
         <h1>🔄 Workflow Automation Builder</h1>
         <div className="project-controls">
@@ -115,8 +116,9 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* ---------- MAIN WORK AREA ---------- */}
       <main className="app-main">
+        <NodePalette />
         {selectedProjectId ? (
           <WorkflowCanvas 
             projectId={selectedProjectId} 

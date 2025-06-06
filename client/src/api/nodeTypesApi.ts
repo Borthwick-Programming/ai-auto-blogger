@@ -1,5 +1,8 @@
 // src/api/nodeTypesApi.ts
 
+import { API_BASE } from './httpBase';
+
+
 export interface NodeDefinition {
   id: string;
   name: string;
@@ -8,7 +11,24 @@ export interface NodeDefinition {
   icon?: string;
 }
 
-const base = '/api/nodes';
+export interface CreateNodeInstanceRequest {
+  nodeTypeId: string;
+  configurationJson: string;
+  positionX: number;
+  positionY: number;
+}
+
+export interface UpdateNodeInstanceRequest {
+  configurationJson?: string;
+  positionX?: number;
+  positionY?: number;
+}
+
+export interface NodeInstanceDto extends CreateNodeInstanceRequest {
+  id: string;
+}
+
+const base = `${API_BASE}/api/nodes`;
 
 // generic helper to keep code DRY
 const json = <T,>(r: Response) => r.json() as Promise<T>;
