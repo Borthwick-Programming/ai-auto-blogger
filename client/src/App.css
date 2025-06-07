@@ -92,7 +92,23 @@ html,body {
 .palette-item:active { cursor: grabbing; }
 
 /* -------- canvas --------------- */
-.canvas    { flex: 1 1 auto; height: 100%; }   /* no 100vh here */
+.canvas    { flex: 1 1 auto; height: 100%; background: #1e1e1e;}   /* no 100vh here */
+
+/* ---------- Style React-Flow controls (zoom / fit) ---------- */
+.react-flow__controls,
+.react-flow__controls button {
+  background:#3b3b3b;                  /* match palette */
+  box-shadow:none;
+  border:none;
+}
+
+.react-flow__controls button:hover {
+  background:#4a4a4a;
+}
+
+.react-flow__controls button svg {
+  fill:#dddddd;                        /* softer icon tint */
+}
 
 /* Loading States */
 .app-loading, .app-error {
@@ -231,6 +247,11 @@ html,body {
   top: 50%;
   transform: translateY(-50%);
 }
+
+.react-flow__attribution {
+  display: none !important;
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
