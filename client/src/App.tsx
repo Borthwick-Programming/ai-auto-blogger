@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import WorkflowCanvas from './components/WorkflowCanvas.tsx';
 import NodePalette from './components/NodePalette.tsx';
 import './App.css';
+import { API_BASE } from './api/httpBase';
 
 interface Project {
   id: string;
@@ -14,7 +15,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const apiBaseUrl = 'http://localhost:5015';
+  const apiBaseUrl = API_BASE;
 
   // Load projects on mount
   useEffect(() => {

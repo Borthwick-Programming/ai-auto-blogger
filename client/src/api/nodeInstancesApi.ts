@@ -7,6 +7,8 @@ import type {
   NodeInstanceDto,             
 } from './nodeTypesApi';
 
+
+
 const base = `${API_BASE}/api/projects`;  // we’ll append {projectId}/nodeinstances
 
 /** Generic helper copied from nodeTypesApi.ts */
@@ -26,17 +28,29 @@ export const createNodeInstance = (
   }).then(r => json<NodeInstanceDto>(r));
 
 /** PUT /api/projects/{projectId}/nodeinstances/{nodeId} */
-export const updateNodeInstance = (
+export const updateNodeInstance = async (
   projectId: string,
   nodeId: string,
-  dto: UpdateNodeInstanceRequest,
-) =>
-  fetch(`${base}/${projectId}/nodeinstances/${nodeId}`, {
+  dto: UpdateNodeInstanceRequest
+) => {
+  const res = await fetch(`${API_BASE}/api/projects/${projectId}/nodeinstances/${nodeId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(dto),
   });
 
+  // Throw if we got a non-2xx status, .catch will fire:
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(`API 400: ${JSON.stringify(errBody)}`);
+  }
+
+  // If your API returns the updated node, you can still parse here:
+  return res.json();
+};
+
 /** DELETE /api/projects/{projectId}/nodeinstances/{nodeId} */
 export const deleteNodeInstance = (projectId: string, nodeId: string) =>
   fetch(`${base}/${projectId}/nodeinstances/${nodeId}`, { method: 'DELETE' });
+
+export type { UpdateNodeInstanceRequest };

@@ -18,10 +18,13 @@ import '@xyflow/react/dist/style.css';
 
 import { NODE_TYPES, EDGE_TYPES } from './nodeRegistry';
 
+import type { UpdateNodeInstanceRequest } from '../api/nodeInstancesApi';
+
 import { createNodeInstance, updateNodeInstance } from '../api/nodeInstancesApi';
 
 import type { ReactFlowInstance } from '@xyflow/react';
 import { useRef } from 'react';
+import { API_BASE } from '../api/httpBase';
 
 /* ---------- Custom node-data payload ---------- */
 interface CanvasNodeData extends Record<string, unknown> {
@@ -43,7 +46,7 @@ interface WorkflowCanvasProps {
 
 const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
   projectId,
-  apiBaseUrl = 'http://localhost:5173',
+  apiBaseUrl = API_BASE,
 }) => {
   /* --- React-Flow state hooks ----------------- */
   const [nodes, setNodes, onNodesChange]   = useNodesState<CanvasNode>([]);
@@ -144,6 +147,7 @@ const onDrop = useCallback(
         type: created.nodeTypeId,
         position,
         data: {
+          projectId:     projectId,
           configuration: {},
           nodeTypeId: created.nodeTypeId,
           nodeId: created.id,
@@ -155,18 +159,21 @@ const onDrop = useCallback(
 );
 
 /* hook to save position changes ------------- */  // <<drag-drop>>
-const onNodeDragStop = useCallback(
-  (_: unknown, node: Node<CanvasNodeData>) => {
-    updateNodeInstance(projectId, node.id, {
-      ...node.data,
+const onNodeDragStop = async (_: any, node: CanvasNode) => {
+  try {
+    const { configuration, nodeTypeId } = node.data;
+    const body: UpdateNodeInstanceRequest = {
+      id: node.id,
+      nodeTypeId,
+      configurationJson: JSON.stringify(configuration),
       positionX: node.position.x,
       positionY: node.position.y,
-    }).catch(console.error);
-  },
-  [projectId],
-);
-
-
+    };
+    await updateNodeInstance(projectId, node.id, body);
+  } catch (err) {
+    console.error('Failed to save node-position:', err);
+  }
+};
 
   if (isLoading) return <div>Loading workflow…</div>;
   if (error)     return <div>Error: {error}</div>;

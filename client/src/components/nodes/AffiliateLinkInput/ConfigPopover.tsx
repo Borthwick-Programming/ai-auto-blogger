@@ -1,7 +1,9 @@
 // src/components/nodes/AffiliateLinkInput/ConfigPopover.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { updateNodeInstance } from '../../../api/nodeInstancesApi';
+import type { UpdateNodeInstanceRequest } from '../../../api/nodeInstancesApi';
+import './ConfigPopover.css';
 
 interface Props {
   nodeId: string;
@@ -27,39 +29,38 @@ const ConfigPopover: React.FC<Props> = ({ nodeId, initial, onClose }) => {
       links,
       csvPath,
     };
-    // 1. Persist to API
-    await updateNodeInstance(
-      rf.getNodes()[0].data.projectId as string, nodeId, {
-      configurationJson: JSON.stringify(payload),
-    });
-    // 2. Update local RF state
-    rf.setNodes(ns =>
-      ns.map(n =>
-        n.id === nodeId
-         ? { ...n, data: { ...n.data, configuration: payload } } 
-         : n
-      )
-    );
-    onClose();
+    const node = rf.getNode(nodeId)!;
+
+    const dto: UpdateNodeInstanceRequest = {
+    id:                 nodeId,
+    nodeTypeId:         node.data.nodeTypeId as string,
+    configurationJson:  JSON.stringify(payload),
+    positionX:          node.position.x,
+    positionY:          node.position.y,
   };
+
+  await updateNodeInstance(
+    node.data.projectId as string,
+    nodeId,
+    dto,
+  );
+
+  rf.setNodes(ns =>
+  ns.map(n =>
+    n.id === nodeId
+      ? { ...n, data: { ...n.data, configuration: payload } }
+      : n
+  )
+);
+
+  onClose();
+  
+};
 
   /* ----- UI ----- */
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: '-8px',
-        left: '160px',
-        width: 320,
-        background: '#1f1f1f',
-        color: '#eee',
-        padding: 12,
-        borderRadius: 6,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-        zIndex: 20,
-      }}
-    >
-      <h4 style={{ margin: '0 0 8px' }}>Affiliate Link Input</h4>
+    <div className="config-popover">
+      <h4>Affiliate Link Input</h4>
 
       <label>
         <input
@@ -81,59 +82,46 @@ const ConfigPopover: React.FC<Props> = ({ nodeId, initial, onClose }) => {
       {mode === 'inline' ? (
         <>
           <textarea
-            placeholder="One URL per line, optionally | note"
-            style={{ width: '100%', height: 100, marginTop: 8 }}
-/* new */
-value={links.map((l: LinkEntry) => `${l.url}|${l.note}`).join('\n')}
-onChange={(e) => {
-const rawLines = e.target.value
-.split('\n')
-.filter(Boolean);
-const parsed: LinkEntry[] = rawLines.map((row) => {
-  const [url, note = ''] = row.split('|');
-  return { url: url.trim(), note: note.trim() };
-  });
-  setLinks(parsed);
-  }}
-/* old:
-            value={links.map(l => `${l.url}|${l.note}`).join('\n')}
-            onChange={e =>
-              setLinks(
-                e.target.value
-                  .split('\n')
-                  .filter(Boolean)
-                  .map(row => {
-                    const [url, note = ''] = row.split('|');
+            placeholder="One URL per line, optionally | note" className="url-list" value={links.map((l: LinkEntry) => `${l.url}|${l.note}`).join('\n')}
+            onChange={(e) => {
+              const rawLines = e.target.value
+              .split('\n')
+              .filter(Boolean);
+              const parsed: LinkEntry[] = rawLines.map((row) => {
+                  const [url, note = ''] = row.split('|');
                     return { url: url.trim(), note: note.trim() };
-                  })
-              )
-            }
-            */
-
+                    });
+                      setLinks(parsed);
+                      }}
           />
         </>
       ) : (
         <>
-          <input
-            type="text"
-            placeholder="c:\\links\\my_links.csv"
-            style={{ width: '100%', marginTop: 8 }}
-            value={csvPath}
-            onChange={e => setCsvPath(e.target.value)}
-          />
-          <p style={{ fontSize: 12, color: '#aaa' }}>
-            CSV must have two columns: url, note
-          </p>
+          {/* <<CSV file input>> */}
+          <div className="file-picker">
+            <input
+            type="file"
+            accept=".csv"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const file = e.target.files?.[0];
+              if (file) setCsvPath(file.name);
+            }}
+            />
+            <div className="fake-input">
+              {csvPath || 'Select CSV file…'}
+              </div>
+              </div>
+              <p>
+                CSV must have two columns: url, note (for the AI to read about what to do)
+                </p>
         </>
       )}
 
-      <div style={{ textAlign: 'right', marginTop: 8 }}>
-        <button onClick={onClose} style={{ marginRight: 6 }}>
-          Cancel
-        </button>
-        <button onClick={save}>Save</button>
-      </div>
-    </div>
+      <div className="actions">
+        <button onClick={onClose}>Cancel</button>
+        <button className="save" onClick={save}>Save</button>
+        </div>
+        </div>
   );
 };
 

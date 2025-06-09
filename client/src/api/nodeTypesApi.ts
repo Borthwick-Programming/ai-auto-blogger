@@ -19,6 +19,8 @@ export interface CreateNodeInstanceRequest {
 }
 
 export interface UpdateNodeInstanceRequest {
+  id: string,
+  nodeTypeId:  string;
   configurationJson?: string;
   positionX?: number;
   positionY?: number;
