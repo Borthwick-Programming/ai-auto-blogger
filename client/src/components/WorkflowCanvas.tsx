@@ -31,6 +31,7 @@ interface CanvasNodeData extends Record<string, unknown> {
   configuration: Record<string, unknown>;
   nodeTypeId: string;
   nodeId: string;
+  projectId: string;
 }
 
 type CanvasNode = Node<CanvasNodeData>;
@@ -83,6 +84,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           configuration: i.configurationJson ? JSON.parse(i.configurationJson) : {},
           nodeTypeId: i.nodeTypeId,
           nodeId: i.id,
+          projectId: i.projectId
         },
       }));
 
@@ -210,6 +212,7 @@ export default WorkflowCanvas;
 /* ---------- API shapes ---------- */
 interface NodeInstance {
   id: string;
+  projectId: string; 
   nodeTypeId: string;
   configurationJson: string;
   positionX: number;
