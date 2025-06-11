@@ -7,9 +7,11 @@ import {
 } from '../../../api/prePromptsApi';
 import React, { useState, useRef, useEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
+import ReactDOM from 'react-dom';
 import { updateNodeInstance } from '../../../api/nodeInstancesApi';
 import type { UpdateNodeInstanceRequest } from '../../../api/nodeInstancesApi';
 import type { PrePrompt } from '../../../api/prePromptsApi';
+
 
 import './ConfigPopover.css';
 
@@ -36,7 +38,9 @@ const ConfigPopover: React.FC<Props> = ({ nodeId, initial, onClose }) => {
 
   /* pre prompts */
   const [prePrompts, setPrePrompts]       = useState<PrePrompt[]>([]);
+
   const [showPromptModal, setShowPromptModal] = useState(false);
+
   const [editingPrompt, setEditingPrompt] = useState<PrePrompt | null>(null);
   const [newPrompt, setNewPrompt]         = useState({ name: '', promptText: '' });
 
@@ -257,7 +261,7 @@ Manage Pre-Prompts
         <button className="save" onClick={save}>Save</button>
         </div>
 
-{showPromptModal && (
+{showPromptModal && ReactDOM.createPortal(
   <div className="preprompt-modal">
     <div className="modal-content">
       <h5>Pre-Prompts</h5>
@@ -304,34 +308,31 @@ Manage Pre-Prompts
         ))}
       </ul>
 
-      <h5>Add New</h5>
-      <input
+      <div className="add-new-form">
+        <input
         placeholder="Name"
         value={newPrompt.name}
         onChange={e => setNewPrompt(np => ({ ...np, name: e.target.value }))}
-      />
-      <textarea
-        placeholder="Prompt text"
-        value={newPrompt.promptText}
-        onChange={e => setNewPrompt(np => ({ ...np, promptText: e.target.value }))}
-      />
-      <button
-        onClick={async () => {
-          const created = await createPrePrompt(newPrompt);
-          setPrePrompts(pl => [...pl, created]);
-          setNewPrompt({ name: '', promptText: '' });
-        }}
-      >
-        Add
-      </button>
-
-      <button onClick={() => setShowPromptModal(false)}>Close</button>
-    </div>
+        />
+  <textarea
+    placeholder="Prompt text"
+    value={newPrompt.promptText}
+    onChange={e => setNewPrompt(np => ({ ...np, promptText: e.target.value }))}
+  />
+  <button className="add-btn" onClick={async () => {
+    const created = await createPrePrompt(newPrompt);
+    setPrePrompts(pl => [...pl, created]);
+    setNewPrompt({ name: '', promptText: '' });
+  }}>
+    Add
+  </button>
   </div>
-)}
-
-
-        </div>
+  <button className="close-btn" onClick={() => setShowPromptModal(false)}>Close</button>
+  </div>
+  </div>,
+  document.body
+  )}
+  </div>
   );
 };
 

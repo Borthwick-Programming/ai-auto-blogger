@@ -277,3 +277,60 @@
   pointer-events: auto;
 }
 
+.preprompt-modal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.preprompt-modal .modal-content{
+  background: #1f1f1f;
+  width: 600px;       
+  max-width: 90vw;     /* never exceed the viewport on small screens */
+  min-width: 320px;    /* ensure it never collapses too small */
+  max-width: 95vw;
+  padding: 24px;
+  border-radius: 8px;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+/* ─── Align the “Add New” row ─── */
+.preprompt-modal .modal-content .add-new-form {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.preprompt-modal .modal-content .add-new-form input {
+  flex: 1;   /* Name field */
+}
+
+.preprompt-modal .modal-content .add-new-form textarea {
+  flex: 2;   /* Prompt text */
+  min-height: 48px;
+  resize: vertical;
+}
+
+.preprompt-modal .modal-content .add-new-form .add-btn {
+  flex: 0 0 auto;     /* just big enough for the button */
+  align-self: flex-end;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* Drop the Close button onto its own line */
+.preprompt-modal .modal-content .close-btn {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
