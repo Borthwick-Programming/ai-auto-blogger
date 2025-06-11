@@ -103,7 +103,7 @@ Manage Pre-Prompts
         />{' '}
         Inline list
       </label>
-      <label style={{ marginLeft: 12 }}>
+      <label style={{ marginLeft: 12, visibility: 'hidden' }}>
         <input
           type="radio"
           checked={mode === 'csv'}
