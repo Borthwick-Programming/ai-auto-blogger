@@ -20,14 +20,18 @@ interface Props {
 }
 
 interface LinkEntry {
+  name: string;
   url: string;
-  note: string;
+  description: string;
+  prePromptName: string;
 }
 
 const ConfigPopover: React.FC<Props> = ({ nodeId, initial, onClose }) => {
   const rf = useReactFlow();
+
   const [mode, setMode] = useState<'inline' | 'csv'>(initial.source);
-  const [links, setLinks] = useState(initial.links ?? []);
+  const [links, setLinks] = useState<LinkEntry[]>(initial.links ?? []);
+
   const [csvPath, setCsvPath] = useState(initial.csvPath ?? '');
 
   /* pre prompts */
@@ -103,28 +107,134 @@ Manage Pre-Prompts
         />{' '}
         CSV file
       </label>
+{mode === 'inline' ? (
+  <>
+    {/* <<Inline link-table>> */}
+    <table className="url-table">
+        <colgroup>
+        <col style={{ width: '20%' }}/>
+        <col style={{ width: '20%' }}/> 
+        <col style={{ width: '40%' }}/> 
+        <col style={{ width: '15%' }}/> 
+        <col style={{ width: '5%' }}/>
+        </colgroup>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>URL</th>
+          <th>Description</th>
+          <th>Pre-prompt</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {links.map((link, idx) => (
+          <tr key={idx}>
+            
+            <td>
+    <input
+      type="text"
+      placeholder="Name"
+      value={link.name}
+      onChange={e => {
+        const copy = [...links];
+        copy[idx].name = e.target.value;
+        setLinks(copy);
+      }}
+    />
+  </td>
 
-      {mode === 'inline' ? (
-        <>
-          <textarea
-            placeholder="One URL per line, optionally | note" className="url-list" value={links.map((l: LinkEntry) => `${l.url}|${l.note}`).join('\n')}
-            onChange={(e) => {
-              const rawLines = e.target.value
-              .split('\n')
-              .filter(Boolean);
-              const parsed: LinkEntry[] = rawLines.map((row) => {
-                  const [url, note = ''] = row.split('|');
-                    return { url: url.trim(), note: note.trim() };
-                    });
-                      setLinks(parsed);
-                      }}
-          />
-        </>
-      ) : (
+  <td>
+    <input
+      type="text"
+      placeholder="https://..."
+      value={link.url}
+      onChange={e => {
+        const copy = [...links];
+        copy[idx].url = e.target.value;
+        setLinks(copy);
+      }}
+    />
+  </td>
+
+  <td>
+    <textarea
+      id={`desc-${idx}`}
+      className="desc-textarea"
+      placeholder="Description / prompt"
+      aria-label="Affiliate link description prompt"
+      value={link.description}
+      onChange={e => {
+        const copy = [...links];
+        copy[idx].description = e.target.value;
+        setLinks(copy);
+      }}
+    />
+  </td>
+
+  <td>
+    <select aria-label="Pre-prompt for affiliate link"
+      title="Select a pre-prompt"
+      name = "preprompt-dropdown"
+      className = "preprompt-dropdown"
+      value={link.prePromptName}
+      onChange={e => {
+        const copy = [...links];
+        copy[idx].prePromptName = e.target.value;
+        setLinks(copy);
+      }}
+    >
+      <option value="">— none —</option>
+      {prePrompts.map(pp => (
+        <option key={pp.id} value={pp.name}>
+          {pp.name}
+        </option>
+      ))}
+    </select>
+  </td>
+
+  <td>
+    <button
+      type="button"
+      className="remove-row"
+      onClick={() =>
+        setLinks(links.filter((_, i) => i !== idx))
+      }
+    >
+      ×
+    </button>
+  </td>
+            
+            
+            
+          </tr>
+        ))}
+        <tr>
+          <td colSpan={5}>
+            <button
+              type="button"
+              className="add-row"
+              onClick={() =>
+                setLinks([
+                  ...links,
+                  { name: '', url: '', description: '', prePromptName: '' },
+                ])
+              }
+            >
+              + Add row
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </>
+) : (
+
         <>
           {/* <<CSV file input>> */}
           <div className="file-picker">
             <input
+            
             type="file"
             accept=".csv"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,6 +265,7 @@ Manage Pre-Prompts
         {prePrompts.map(pp => (
           <li key={pp.id} className="pp-row">
             <input
+            
               value={pp.name}
               onChange={e => {
                 const updated = { ...pp, name: e.target.value };

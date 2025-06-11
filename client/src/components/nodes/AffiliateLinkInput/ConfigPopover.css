@@ -23,18 +23,6 @@
   margin-top: 8px;
 }
 
-.config-popover input[type="text"],
-.config-popover textarea {
-  width: 100%;
-  padding: 6px;
-  margin-top: 4px;
-  font-size: 14px;
-  font-family: inherit;
-  background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 4px;
-  color: #eee;
-}
 
 .config-popover p {
   font-size: 12px;
@@ -173,3 +161,119 @@
 .preprompt-modal .actions-row button:hover {
   background-color: #2b5c9f;
 }
+
+.url-table .desc-textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 4px 6px;
+  border-radius: 3px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #eee;
+  resize: vertical;         /* user can drag to grow/shrink vertically */
+}
+
+.config-popover {
+  width: 400px;
+}
+
+.config-popover .url-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin-top: 6px;
+}
+
+.config-popover .url-table th,
+.config-popover .url-table td {
+  padding: 4px 6px;
+  font-size: 12px;
+  color: #ccc;
+}
+
+/* Force header wrap */
+.config-popover .url-table th {
+  white-space: normal;
+  font-weight: 500;
+}
+
+/* Inputs & selects in that table */
+.config-popover .url-table input,
+.config-popover .url-table select,
+.config-popover .url-table .desc-textarea {
+  width: 100%;
+  font-size: 10px;
+  padding: 4px 6px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 3px;
+  color: #eee;
+  line-height: 1.2;
+}
+
+
+/* Ensure inputs & selects shrink to fit their cells */
+.config-popover .url-table td input,
+.config-popover .url-table td select,
+.config-popover .url-table .desc-textarea {
+  resize: both;
+  min-height: 48px;
+  font-size: 10px;
+}
+
+/* ─── Explicit col widths via nth-child ─── */
+.config-popover .url-table td:nth-child(1),
+.config-popover .url-table th:nth-child(1) { width: 15%; }
+.config-popover .url-table td:nth-child(2),
+.config-popover .url-table th:nth-child(2) { width: 30%; }
+.config-popover .url-table td:nth-child(3),
+.config-popover .url-table th:nth-child(3) { width: 40%; }
+.config-popover .url-table td:nth-child(4),
+.config-popover .url-table th:nth-child(4) { width: 12%; }
+.config-popover .url-table td:nth-child(5),
+.config-popover .url-table th:nth-child(5) { width: 3%; }
+
+.config-popover .url-table select {
+  width: auto;         /* let the browser size to content + padding */
+  min-width: 0;        /* don’t force any minimum */
+  max-width: 100px;    /* cap it so you can always see the label */
+  padding: 4px 8px;    /* keep it tight inside */
+  font-size: 12px;
+}
+
+.config-popover .remove-row {
+  font-size: 12px;
+  padding: 2px 6px;
+}
+
+.config-popover {
+  width: 670px; 
+}
+
+.config-popover .preprompt-dropdown {
+  font-size: 10px;
+  padding: 4px 6px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 3px;
+  color: #eee;
+  /* if you need a custom width: */
+  width: 100%;
+  /* or an explicit px/em: */
+  /* width: 120px; */
+}
+
+/* position wrapper absolutely so it floats over the canvas */
+.config-popover-wrapper {
+  position: absolute;
+  top: 100%;     /* immediately below the node box */
+  left: 0;       /* aligned to the node’s left edge */
+  z-index: 100;  /* above other nodes/edges */
+  pointer-events: none; /* allow clicks through the wrapper background */
+}
+
+/* Let the popover catch pointer events */
+.config-popover-wrapper .config-popover {
+  pointer-events: auto;
+}
+

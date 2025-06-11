@@ -96,6 +96,7 @@ function App() {
         <h1>🔄 Workflow Automation Builder</h1>
         <div className="project-controls">
           <select
+            title = "Project Selector"
             value={selectedProjectId || ''}
             onChange={(e) => setSelectedProjectId(e.target.value)}
             disabled={projects.length === 0}

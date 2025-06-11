@@ -18,7 +18,7 @@ export default function AffiliateLinkInputNode({ selected, id, data }: NodeProps
   const [open, setOpen] = useState(false);
 
   return (
-    <>
+    <div style={{ position: 'relative', display: 'inline-block' }}>
       <div
         style={{
           ...box,
@@ -28,14 +28,18 @@ export default function AffiliateLinkInputNode({ selected, id, data }: NodeProps
       >
         Affiliate Links
       </div>
+
       <Handle type="source" position={Position.Right} id="out" />
+
       {open && (
-        <ConfigPopover
-          nodeId={id}
-          initial={data.configuration}
-          onClose={() => setOpen(false)}
-        />
+        <div className="config-popover-wrapper">
+          <ConfigPopover
+            nodeId={id}
+            initial={data.configuration}
+            onClose={() => setOpen(false)}
+          />
+        </div>
       )}
-    </>
+    </div>
   );
 }
